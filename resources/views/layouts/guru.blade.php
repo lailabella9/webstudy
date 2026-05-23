@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Dashboard') — WebStudy CBT</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+    <link rel="shortcut icon" href="{{ asset('logo.png') }}">
+    <style>
+        :root {
+            --sidebar-w: 210px;
+            --brand: #1a56db;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: #0f172a;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 200;
+            overflow-y: auto;
+        }
+
+        .sb-logo {
+            padding: 20px 16px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+        }
+
+        .sb-logo-inner {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .sb-logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .sb-logo-text {
+            font-size: 14px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .sb-logo-sub {
+            font-size: 10px;
+            color: rgba(255, 255, 255, .35);
+        }
+
+        .sb-nav {
+            padding: 12px 10px;
+            flex: 1;
+        }
+
+        .sb-section-label {
+            font-size: 9.5px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, .28);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: 10px 10px 5px;
+        }
+
+        .sb-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, .62);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            margin-bottom: 1px;
+            transition: background .15s, color .15s;
+        }
+
+        .sb-item i {
+            font-size: 15px;
+            width: 18px;
+            text-align: center;
+        }
+
+        .sb-item:hover {
+            background: rgba(255, 255, 255, .07);
+            color: #fff;
+        }
+
+        .sb-item.active {
+            background: var(--brand);
+            color: #fff;
+        }
+
+        .sb-divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, .07);
+            margin: 8px 10px;
+        }
+
+        .sb-footer {
+            padding: 12px 10px;
+            border-top: 1px solid rgba(255, 255, 255, .08);
+        }
+
+        .sb-user {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: rgba(255, 255, 255, .06);
+            border-radius: 10px;
+            padding: 10px 11px;
+        }
+
+        .sb-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #3b82f6, #818cf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .sb-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sb-uname {
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .sb-urole {
+            font-size: 10px;
+            color: rgba(255, 255, 255, .35);
+        }
+
+        /* ── MAIN ── */
+        .main-wrap {
+            margin-left: var(--sidebar-w);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid #e9edf2;
+            padding: 13px 26px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar h1 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .topbar p {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 1px;
+        }
+
+        .topbar-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-primary-sm {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--brand);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity .15s;
+        }
+
+        .btn-primary-sm:hover {
+            opacity: .88;
+            color: #fff;
+        }
+
+        .btn-icon-sm {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 16px;
+            text-decoration: none;
+            transition: background .15s;
+        }
+
+        .btn-icon-sm:hover {
+            background: #e2e8f0;
+            color: #374151;
+        }
+
+        /* ── PAGE CONTENT ── */
+        .page-content {
+            padding: 22px 26px;
+            flex: 1;
+        }
+
+        /* ── FLASH MESSAGES ── */
+        .flash {
+            border-radius: 10px;
+            padding: 11px 16px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .flash-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #15803d;
+        }
+
+        .flash-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+        }
+
+        /* Quill toolbar & editor styling */
+        #quill-editor {
+            min-height: 220px;
+            max-height: 480px;
+            overflow-y: auto;
+            font-size: 13.5px;
+            font-family: inherit;
+            line-height: 1.7;
+            background: #f8fafc;
+            border-radius: 0 0 9px 9px;
+            border: none;
+        }
+
+        .ql-toolbar.ql-snow {
+            border: 1.5px solid #e2e8f0;
+            border-bottom: 1px solid #e9edf2;
+            border-radius: 9px 9px 0 0;
+            background: #fff;
+            padding: 8px 10px;
+        }
+
+        .ql-container.ql-snow {
+            border: 1.5px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 9px 9px;
+            background: #f8fafc;
+        }
+
+        /* Focus ring matches the other inputs */
+        .ql-editor-focused .ql-toolbar.ql-snow,
+        .ql-editor-focused .ql-container.ql-snow {
+            border-color: #1a56db;
+        }
+
+        .quill-wrapper:focus-within .ql-toolbar.ql-snow,
+        .quill-wrapper:focus-within .ql-container.ql-snow {
+            border-color: #1a56db;
+        }
+
+        .ql-editor.ql-blank::before {
+            color: #94a3b8;
+            font-style: normal;
+            font-size: 13px;
+        }
+    </style>
+    @stack('styles')
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-icon"><img src="{{ asset('logo.png') }}" alt="" width="32"
+                        height="32"></div>
+                <div>
+                    <div class="sb-logo-text">WebStudy</div>
+                    <div class="sb-logo-sub">CBT Platform</div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sb-nav">
+            <div class="sb-section-label">Menu Utama</div>
+            <a href="{{ route('guru.dashboard') }}"
+                class="sb-item {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}">
+                <i class="bi bi-grid-fill"></i> Dashboard
+            </a>
+            <a href="{{ route('guru.kelas.index') }}"
+                class="sb-item {{ request()->routeIs('guru.kelas.*') ? 'active' : '' }}">
+                <i class="bi bi-journal-richtext"></i> Kelola Kelas
+            </a>
+            <a href="{{ route('guru.mapel.index') }}"
+                class="sb-item {{ request()->routeIs('guru.mapel.*') ? 'active' : '' }}">
+                <i class="bi bi-journal-richtext"></i> Kelola Mata Pelajaran
+            </a>
+
+            <a href="{{ route('guru.materi.all') }}"
+                class="sb-item {{ request()->routeIs('guru.materi.all') ? 'active' : '' }}">
+                <i class="bi bi-journal-richtext"></i> Kelola Materi
+            </a>
+
+            <a href="{{ route('guru.soal.all') }}"
+                class="sb-item {{ request()->routeIs('guru.soal.all') ? 'active' : '' }}">
+                <i class="bi bi-journal-richtext"></i> Kelola Soal
+            </a>
+
+            <a href="{{ route('guru.siswa.index') }}"
+                class="sb-item {{ request()->routeIs('guru.siswa.*') ? 'active' : '' }}">
+                <i class="bi bi-people-fill"></i> Data Siswa
+            </a>
+            <hr class="sb-divider">
+            <div class="sb-section-label">Laporan</div>
+            <a href="{{ route('guru.laporan') }}"
+                class="sb-item {{ request()->routeIs('guru.laporan') ? 'active' : '' }}">
+                <i class="bi bi-bar-chart-fill"></i> Statistik & Laporan
+            </a>
+            <a href="{{ route('guru.progres') }}"
+                class="sb-item {{ request()->routeIs('guru.progres') ? 'active' : '' }}">
+                <i class="bi bi-graph-up-arrow"></i> Progres Siswa
+            </a>
+            <a href="{{ route('guru.evaluasi') }}"
+                class="sb-item {{ request()->routeIs('guru.evaluasi') ? 'active' : '' }}">
+                <i class="bi bi-search"></i> Jawaban Siswa
+            </a>
+            <hr class="sb-divider">
+            <a href="{{ route('guru.profil.edit') }}"
+                class="sb-item {{ request()->routeIs('guru.profil.*') ? 'active' : '' }}">
+                <i class="bi bi-person-circle"></i> Profil Guru
+            </a>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="sb-item w-100 border-0 bg-transparent text-start" style="cursor:pointer;">
+                    <i class="bi bi-box-arrow-left"></i> Keluar
+                </button>
+            </form>
+        </nav>
+
+        <div class="sb-footer">
+            <div class="sb-user">
+                <div class="sb-avatar">
+                    @if (auth()->user()->foto_profil)
+                        <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="">
+                    @else
+                        {{ strtoupper(substr(auth()->user()->nama, 0, 1)) }}
+                    @endif
+                </div>
+                <div>
+                    <div class="sb-uname">{{ auth()->user()->nama }}</div>
+                    <div class="sb-urole">Guru / Admin</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main-wrap">
+        <div class="topbar">
+            <div>
+                <h1>@yield('page-title', 'Dashboard')</h1>
+                <p>@yield('page-subtitle', 'Selamat datang di panel guru WebStudy CBT')</p>
+            </div>
+            <div class="topbar-right">
+                @yield('topbar-actions')
+            </div>
+        </div>
+
+        <div style="padding: 0 26px; margin-top: 16px;">
+            @if (session('success'))
+                <div class="flash flash-success"><i class="bi bi-check-circle-fill"></i> {{ session('success') }}</div>
+            @endif
+            @if (session('error'))
+                <div class="flash flash-error"><i class="bi bi-x-circle-fill"></i> {{ session('error') }}</div>
+            @endif
+            @if ($errors->any())
+                <div class="flash flash-error">
+                    <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
+                    <ul class="mb-0 ps-3">
+                        @foreach ($errors->all() as $e)
+                            <li>{{ $e }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+        </div>
+        <div class="page-content">
+            @yield('content')
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    @stack('scripts')
+</body>
+
+</html>
