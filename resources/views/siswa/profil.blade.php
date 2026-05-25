@@ -16,12 +16,12 @@
             {{-- Foto & Info --}}
             <div style="background:#fff; border-radius:14px; border:1px solid #e9edf2; overflow:hidden;">
                 {{-- Cover --}}
-                <div style="height:90px; background:linear-gradient(135deg,#1a56db,#4f46e5);"></div>
+                <div style="height:90px; background:#1a56db;"></div>
                 {{-- Avatar --}}
                 <div style="padding:0 20px 20px; position:relative;">
                     <div style="position:relative; width:72px; margin-top:-36px; margin-bottom:12px;">
                         <div
-                            style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#818cf8);border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;overflow:hidden;">
+                            style="width:72px;height:72px;border-radius:50%;background:#1a56db;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;overflow:hidden;">
                             @if ($user->foto_profil)
                                 <img src="{{ asset('storage/' . $user->foto_profil) }}"
                                     style="width:100%;height:100%;object-fit:cover;" alt="">

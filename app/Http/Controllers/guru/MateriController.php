@@ -29,9 +29,14 @@ class MateriController extends Controller
     {
         $guru = Auth::user();
 
-        $search = $request->search;
+        $search   = $request->search;
+        $kelas_id = $request->kelas_id;
+        $kelasList = \App\Models\Kelas::orderBy('nama')->get();
 
         $mapels = MataPelajaran::where('Id_user', $guru->Id_user)
+            ->when($kelas_id, function ($q) use ($kelas_id) {
+                $q->where('kelas_id', $kelas_id);
+            })
             ->with(['materis' => function ($q) use ($search) {
                 $q->withCount('soals')
                     ->orderBy('urutan');
@@ -47,7 +52,7 @@ class MateriController extends Controller
         $totalMateri = $mapels->sum(fn($m) => $m->materis->count());
         $totalSoal   = $mapels->sum(fn($m) => $m->materis->sum('soals_count'));
 
-        return view('guru.materi.all', compact('mapels', 'totalMapel', 'totalMateri', 'totalSoal', 'search'));
+        return view('guru.materi.all', compact('mapels', 'totalMapel', 'totalMateri', 'totalSoal', 'search', 'kelasList', 'kelas_id'));
     }
 
     public function index(MataPelajaran $mapel)

@@ -99,14 +99,9 @@
 
             <div style="padding:14px 20px;max-height:420px;overflow-y:auto;">
                 @forelse ($progresMapel as $mapel)
-                    @php
-                        $colors = ['#1a56db', '#4f46e5', '#0f766e', '#b45309', '#be185d', '#0369a1'];
-                        $mc = $colors[crc32($mapel['nama']) % 6];
-                    @endphp
-
                     {{-- Header Mapel --}}
                     <div style="display:flex;align-items:center;gap:8px;margin:{{ $loop->first ? '0' : '14px' }} 0 8px;">
-                        <div style="width:6px;height:6px;border-radius:50%;background:{{ $mc }};flex-shrink:0;">
+                        <div style="width:6px;height:6px;border-radius:50%;background:#1a56db;flex-shrink:0;">
                         </div>
                         <span style="font-size:12px;font-weight:700;color:#0f172a;">{{ $mapel['nama'] }}</span>
                         @if ($mapel['avg'] > 0)
@@ -123,7 +118,7 @@
                         @php
                             $barColor = $p['nilai'] >= $kkm ? '#22c55e' : ($p['nilai'] >= 50 ? '#f59e0b' : '#94a3b8');
                         @endphp
-                        <div style="margin-bottom:9px;padding-left:14px;border-left:2px solid {{ $mc }}30;">
+                        <div style="margin-bottom:9px;padding-left:14px;border-left:2px solid rgba(26,86,219,0.18);">
                             <div
                                 style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:8px;">
                                 <span
@@ -244,17 +239,11 @@
         @else
             <div style="padding:16px 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
                 @foreach ($lanjutkan as $mapel)
-                    @php
-                        $colors = ['#1a56db', '#4f46e5', '#0f766e', '#b45309', '#be185d', '#0369a1'];
-                        $idx = crc32($mapel->nama) % 6;
-                        $c1 = $colors[$idx];
-                        $c2 = $colors[($idx + 2) % 6];
-                    @endphp
                     <div style="border:1px solid #e9edf2;border-radius:12px;overflow:hidden;transition:box-shadow .15s;"
                         onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.08)'"
                         onmouseout="this.style.boxShadow=''">
                         <div
-                            style="height:80px;background:linear-gradient(135deg,{{ $c1 }},{{ $c2 }});display:flex;align-items:center;padding:0 16px;gap:10px;">
+                            style="height:80px;background:#1a56db;display:flex;align-items:center;padding:0 16px;gap:10px;">
                             <div
                                 style="font-size:22px;font-weight:900;color:rgba(255,255,255,.2);font-style:italic;flex-shrink:0;">
                                 {{ strtoupper(substr($mapel->nama, 0, 2)) }}
@@ -269,7 +258,7 @@
                                 bab tersedia
                             </div>
                             <a href="{{ route('siswa.latihan.mapel', $mapel) }}"
-                                style="display:block;text-align:center;background:{{ $c1 }};color:#fff;border-radius:8px;padding:7px;font-size:12px;font-weight:600;text-decoration:none;"
+                                style="display:block;text-align:center;background:#1a56db;color:#fff;border-radius:8px;padding:7px;font-size:12px;font-weight:600;text-decoration:none;"
                                 onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
                                 <i class="bi bi-play-circle" style="margin-right:4px;"></i>Buka Materi
                             </a>

@@ -5,18 +5,111 @@
 
 @section('content')
 
-    {{-- Pilih materi --}}
-    <form method="GET" style="margin-bottom:20px;">
-        <select name="materi_id" onchange="this.form.submit()"
-            style="min-width:280px;height:40px;border:1.5px solid #e2e8f0;border-radius:9px;padding:0 14px;font-size:13px;background:#fff;outline:none;color:#0f172a;">
-            <option value="">— Pilih Materi —</option>
-            @foreach ($materis as $m)
-                <option value="{{ $m->Id_materi }}" {{ optional($selected)->Id_materi == $m->Id_materi ? 'selected' : '' }}>
-                    {{ $m->judul }}
-                </option>
-            @endforeach
-        </select>
-    </form>
+    {{-- Filter Materi & Kategori --}}
+    <div style="background:#fff;border-radius:16px;border:1px solid #e9edf2;padding:20px;margin-bottom:20px;box-shadow:0 4px 20px -2px rgba(15,23,42,0.04);">
+        <form id="filterForm" method="GET" style="display:flex;flex-direction:column;gap:16px;">
+            <input type="hidden" name="kategori_id" id="filterKategoriId" value="{{ $kategoriId }}">
+
+            {{-- Row 1: Select Materi --}}
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:nowrap;">
+                <div style="display:flex;align-items:center;gap:8px;min-width:110px;color:#475569;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.05em;">
+                    <i class="bi bi-journal-check" style="font-size:16px;color:#10b981;"></i>
+                    <span>Materi</span>
+                </div>
+                <select name="materi_id" onchange="this.form.submit()"
+                    style="min-width:280px;height:40px;border:1.5px solid #e2e8f0;border-radius:10px;padding:0 14px;font-size:13px;background:#fff;outline:none;color:#0f172a;cursor:pointer;">
+                    <option value="">— Pilih Materi —</option>
+                    @foreach ($materis->groupBy(fn($m) => ($m->mataPelajaran->nama ?? 'Umum') . ($m->mataPelajaran->kelas ? ' (' . $m->mataPelajaran->kelas->nama . ')' : '')) as $mapelNama => $babList)
+                        <optgroup label="{{ $mapelNama }}">
+                            @foreach ($babList as $m)
+                                <option value="{{ $m->Id_materi }}" {{ optional($selected)->Id_materi == $m->Id_materi ? 'selected' : '' }}>
+                                    {{ $m->judul }}
+                                </option>
+                            @endforeach
+                        </optgroup>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Divider --}}
+            <div style="height:1px;background:#f1f5f9;width:100%;"></div>
+
+            {{-- Row 2: Kategori Latihan --}}
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:nowrap;">
+                <div style="display:flex;align-items:center;gap:8px;min-width:110px;color:#475569;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.05em;">
+                    <i class="bi bi-tags-fill" style="font-size:16px;color:#1a56db;"></i>
+                    <span>Kategori</span>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1;">
+                    <button type="button" onclick="setFilter('')" class="filter-pill {{ !$kategoriId ? 'active-all' : '' }}">
+                        <i class="bi bi-grid-1x2-fill"></i> Semua Kategori
+                    </button>
+                    @foreach ($kategoris as $k)
+                        <button type="button" onclick="setFilter('{{ $k->Id_kategori }}')" 
+                            class="filter-pill {{ $kategoriId == $k->Id_kategori ? 'active-cat' : '' }}"
+                            style="--cat-color: {{ $k->warna }};">
+                            <i class="bi {{ $k->ikon }}"></i> {{ $k->nama }}
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        .filter-pill {
+            padding: 8px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1.5px solid #e2e8f0;
+            background: #f8fafc;
+            color: #475569;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .filter-pill i {
+            font-size: 14px;
+            opacity: 0.8;
+            transition: transform 0.2s ease;
+        }
+        .filter-pill:hover {
+            border-color: #cbd5e1;
+            background: #eff1f5;
+            color: #0f172a;
+            transform: translateY(-1px);
+        }
+        .filter-pill:hover i {
+            transform: scale(1.1);
+        }
+        .filter-pill.active-all {
+            background: #1a56db;
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(26, 86, 219, 0.25);
+            transform: translateY(-1px) scale(1.02);
+        }
+        .filter-pill.active-cat {
+            background: var(--cat-color);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px) scale(1.02);
+        }
+        .filter-pill.active-all i, .filter-pill.active-cat i {
+            opacity: 1;
+        }
+    </style>
+
+    <script>
+        function setFilter(value) {
+            document.getElementById('filterKategoriId').value = value;
+            document.getElementById('filterForm').submit();
+        }
+    </script>
 
     @if ($selected && count($evaluasiData))
         <div style="display:flex;flex-direction:column;gap:14px;">

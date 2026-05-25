@@ -31,10 +31,6 @@
     @php
         $mapel   = $item['mapel'];
         $materis = $item['materis'];
-        $colors  = ['#1a56db', '#4f46e5', '#0f766e', '#b45309', '#be185d', '#0369a1'];
-        $idx     = crc32($mapel->nama) % 6;
-        $c1      = $colors[$idx];
-        $c2      = $colors[($idx + 2) % 6];
     @endphp
 
     <div x-data="{ open: true }" style="margin-bottom:18px;">
@@ -42,10 +38,11 @@
         {{-- Mapel header --}}
         <div @click="open = !open"
             style="display:flex;align-items:center;gap:14px;padding:14px 20px;
-                   background:linear-gradient(135deg,{{ $c1 }},{{ $c2 }});
-                   border-radius:14px;cursor:pointer;user-select:none;color:#fff;">
+                   background:#1a56db;
+                   cursor:pointer;user-select:none;color:#fff;transition:border-radius .2s ease;"
+            :style="{ borderRadius: open ? '14px 14px 0 0' : '14px' }">
 
-            <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.2);
+            <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);
                         display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <span style="font-size:15px;font-weight:900;color:#fff;font-style:italic;">
                     {{ strtoupper(substr($mapel->nama, 0, 2)) }}
@@ -71,7 +68,8 @@
              x-transition:enter-end="opacity-100 translate-y-0"
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-2">
+             x-transition:leave-end="opacity-0 -translate-y-2"
+             style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);overflow:hidden;">
 
             @foreach ($materis as $babItem)
                 @php
@@ -98,10 +96,10 @@
                          onmouseover="this.style.background='#fafbff'"
                          onmouseout="this.style.background=''">
 
-                        <div style="width:38px;height:38px;border-radius:10px;
-                                    background:linear-gradient(135deg,{{ $c1 }},{{ $c2 }});
+                        <div style="width:38px;height:38px;border-radius:50%;
+                                    background:#1a56db;
                                     display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <i class="bi bi-journal-richtext" style="color:#fff;font-size:16px;"></i>
+                            <span style="color:#fff;font-size:14px;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;">{{ $loop->iteration }}</span>
                         </div>
 
                         <div style="flex:1;min-width:0;">
@@ -140,7 +138,7 @@
 
                         <i class="bi bi-chevron-down"
                            style="color:#94a3b8;font-size:12px;transition:transform .2s;flex-shrink:0;"
-                           :style="expand ? 'transform:rotate(180deg)' : ''"></i>
+                           :style="{ transform: expand ? 'rotate(180deg)' : 'none' }"></i>
                     </div>
 
                     {{-- Detail konten --}}
@@ -149,23 +147,6 @@
                          x-transition:enter-start="opacity-0"
                          x-transition:enter-end="opacity-100"
                          style="background:#fafbfc;border-top:1px solid #f1f5f9;padding:16px 20px 16px 72px;">
-
-                        @if ($hasKonten)
-                            {{-- Tombol buka konten di tab baru --}}
-                            {{-- json_encode agar konten HTML aman di-pass ke JS --}}
-                            <button type="button"
-                                onclick="bukaKonten({{ json_encode($materi->judul) }}, {{ json_encode($materi->konten) }})"
-                                style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;
-                                       background:#fff;border:1px solid #e2e8f0;border-radius:10px;
-                                       font-size:12.5px;font-weight:600;color:#1a56db;cursor:pointer;
-                                       transition:all .15s;margin-bottom:8px;"
-                                onmouseover="this.style.background='#eff6ff';this.style.borderColor='#93c5fd'"
-                                onmouseout="this.style.background='#fff';this.style.borderColor='#e2e8f0'">
-                                <i class="bi bi-file-text" style="font-size:14px;"></i>
-                                Baca Materi
-                                <i class="bi bi-box-arrow-up-right" style="font-size:11px;color:#94a3b8;"></i>
-                            </button>
-                        @endif
 
                         @if ($hasFile)
                             {{-- Download card --}}
@@ -195,19 +176,37 @@
                             </div>
                         @endif
 
-                        {{-- ===== CODE PLAYGROUND ===== --}}
-                        <button type="button" onclick="pgOpenNew({{ $materi->Id_materi }})"
-                            style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;
-                                   background:#fff;border:1px solid #e2e8f0;border-radius:10px;
-                                   font-size:12.5px;font-weight:600;color:#4f46e5;cursor:pointer;
-                                   transition:all .15s;margin-top:4px;"
-                            onmouseover="this.style.background='#f5f3ff';this.style.borderColor='#c4b5fd'"
-                            onmouseout="this.style.background='#fff';this.style.borderColor='#e2e8f0'">
-                            <i class="bi bi-code-slash" style="font-size:14px;"></i>
-                            Coba Code
-                            <i class="bi bi-box-arrow-up-right" style="font-size:11px;color:#94a3b8;"></i>
-                        </button>
-                        {{-- ===== END PLAYGROUND ===== --}}
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;">
+                            @if ($hasKonten)
+                                {{-- Tombol buka konten di tab baru --}}
+                                <button type="button"
+                                    onclick="bukaKonten({{ json_encode($materi->judul) }}, {{ json_encode($materi->konten) }})"
+                                    style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;
+                                           background:#fff;border:1px solid #e2e8f0;border-radius:10px;
+                                           font-size:12.5px;font-weight:600;color:#1a56db;cursor:pointer;
+                                           transition:all .15s;"
+                                    onmouseover="this.style.background='#eff6ff';this.style.borderColor='#93c5fd'"
+                                    onmouseout="this.style.background='#fff';this.style.borderColor='#e2e8f0'">
+                                    <i class="bi bi-file-text" style="font-size:14px;"></i>
+                                    Baca Materi
+                                    <i class="bi bi-box-arrow-up-right" style="font-size:11px;color:#94a3b8;"></i>
+                                </button>
+                            @endif
+
+                            {{-- ===== CODE PLAYGROUND ===== --}}
+                            <button type="button" onclick="pgOpenNew({{ $materi->Id_materi }})"
+                                style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;
+                                       background:#fff;border:1px solid #e2e8f0;border-radius:10px;
+                                       font-size:12.5px;font-weight:600;color:#4f46e5;cursor:pointer;
+                                       transition:all .15s;"
+                                onmouseover="this.style.background='#f5f3ff';this.style.borderColor='#c4b5fd'"
+                                onmouseout="this.style.background='#fff';this.style.borderColor='#e2e8f0'">
+                                <i class="bi bi-code-slash" style="font-size:14px;"></i>
+                                Coba Code
+                                <i class="bi bi-box-arrow-up-right" style="font-size:11px;color:#94a3b8;"></i>
+                            </button>
+                            {{-- ===== END PLAYGROUND ===== --}}
+                        </div>
 
                         @if (!$hasKonten && !$hasFile)
                             <div style="text-align:center;padding:20px;color:#94a3b8;">

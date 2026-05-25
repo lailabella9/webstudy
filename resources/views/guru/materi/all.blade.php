@@ -44,19 +44,31 @@
 
     {{-- ── Search ── --}}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-        <form method="GET" style="display:flex;gap:10px;flex:1;">
-            <div style="position:relative;min-width:260px;">
+        <form method="GET" style="display:flex;gap:10px;flex:1;flex-wrap:wrap;">
+            <div style="position:relative;min-width:260px;flex:1;max-width:320px;">
                 <i class="bi bi-search"
                     style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;"></i>
                 <input type="text" name="search" value="{{ $search }}" placeholder="Cari judul materi..."
                     style="width:100%;height:38px;border:1.5px solid #e2e8f0;border-radius:9px;padding:0 12px 0 34px;font-size:13px;color:#0f172a;background:#fff;outline:none;"
                     onfocus="this.style.borderColor='#1a56db'" onblur="this.style.borderColor='#e2e8f0'">
             </div>
+
+            {{-- Filter Kelas / Jurusan --}}
+            <select name="kelas_id" onchange="this.form.submit()"
+                style="height:38px;padding:0 12px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;color:#374151;outline:none;font-family:inherit;background:#fff;min-width:180px;cursor:pointer;">
+                <option value="">Semua Kelas & Jurusan</option>
+                @foreach ($kelasList as $k)
+                    <option value="{{ $k->Id_kelas }}" {{ $kelas_id == $k->Id_kelas ? 'selected' : '' }}>
+                        {{ $k->nama }}
+                    </option>
+                @endforeach
+            </select>
+
             <button type="submit"
                 style="height:38px;padding:0 18px;border:1.5px solid #e2e8f0;border-radius:9px;background:#fff;font-size:13px;font-weight:500;color:#374151;cursor:pointer;display:flex;align-items:center;gap:6px;">
                 <i class="bi bi-funnel"></i> Cari
             </button>
-            @if ($search)
+            @if ($search || $kelas_id)
                 <a href="{{ route('guru.materi.all') }}"
                     style="height:38px;padding:0 14px;border:1.5px solid #e2e8f0;border-radius:9px;background:#fff;font-size:13px;color:#64748b;display:flex;align-items:center;text-decoration:none;">
                     ✕ Reset
@@ -68,9 +80,6 @@
     {{-- ── Per Mapel ── --}}
     @forelse($mapels as $mapel)
         @php
-            $colors = ['#1a56db', '#4f46e5', '#0f766e', '#b45309', '#be185d', '#0369a1'];
-            $idx = crc32($mapel->nama) % 6;
-            $color = $colors[$idx];
             $materis = $mapel->materis;
         @endphp
 
@@ -82,12 +91,19 @@
                 onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,.06)'" onmouseout="this.style.boxShadow=''">
 
                 <div
-                    style="width:40px;height:40px;border-radius:10px;background:{{ $color }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    style="width:40px;height:40px;border-radius:10px;background:#1a56db;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <i class="bi bi-collection-fill" style="color:#fff;font-size:17px;"></i>
                 </div>
 
                 <div style="flex:1;">
-                    <div style="font-size:14px;font-weight:700;color:#0f172a;">{{ $mapel->nama }}</div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span style="font-size:14px;font-weight:700;color:#0f172a;">{{ $mapel->nama }}</span>
+                        @if($mapel->kelas)
+                            <span style="display:inline-block;padding:2px 8px;border-radius:20px;background:#eff6ff;color:#1e3a8a;font-size:10.5px;font-weight:600;white-space:nowrap;">
+                                {{ $mapel->kelas->nama }}
+                            </span>
+                        @endif
+                    </div>
                     <div style="font-size:12px;color:#64748b;margin-top:2px;">
                         {{ $materis->count() }} bab &middot;
                         {{ $materis->sum('soals_count') }} soal total
@@ -97,7 +113,7 @@
                 <div style="display:flex;align-items:center;gap:10px;">
                     {{-- Tambah bab di mapel ini --}}
                     <a href="{{ route('guru.materi.create', $mapel) }}" @click.stop
-                        style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:{{ $color }}12;border:1.5px solid {{ $color }}30;border-radius:9px;font-size:12.5px;font-weight:600;color:{{ $color }};text-decoration:none;">
+                        style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(26,86,219,0.07);border:1.5px solid rgba(26,86,219,0.18);border-radius:9px;font-size:12.5px;font-weight:600;color:#1a56db;text-decoration:none;">
                         <i class="bi bi-plus-circle"></i> Tambah Bab
                     </a>
                     <i class="bi bi-chevron-down" style="color:#94a3b8;font-size:13px;transition:transform .2s;"
@@ -148,7 +164,7 @@
                                         <td style="padding:13px 16px;">
                                             <div style="display:flex;align-items:center;gap:11px;">
                                                 <div
-                                                    style="width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,{{ $color }},{{ $color }}aa);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                    style="width:36px;height:36px;border-radius:9px;background:#1a56db;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                                     <i class="bi bi-journal-richtext"
                                                         style="color:#fff;font-size:15px;"></i>
                                                 </div>
@@ -226,7 +242,7 @@
                             style="font-size:28px;display:block;margin-bottom:8px;color:#cbd5e1;"></i>
                         <div style="font-size:13px;font-weight:500;margin-bottom:8px;">Belum ada bab untuk mapel ini</div>
                         <a href="{{ route('guru.materi.create', $mapel) }}"
-                            style="font-size:12.5px;color:{{ $color }};font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+                                                            style="font-size:12.5px;color:#1a56db;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
                             <i class="bi bi-plus-circle"></i> Tambah bab pertama
                         </a>
                     </div>

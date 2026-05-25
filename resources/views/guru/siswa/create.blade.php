@@ -29,7 +29,7 @@
             width: 34px;
             height: 34px;
             border-radius: 9px;
-            background: linear-gradient(135deg, #1a56db, #4f46e5);
+            background: #1a56db;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -166,7 +166,7 @@
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #1a56db, #4f46e5);
+            background: #1a56db;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -246,7 +246,7 @@
             align-items: center;
             gap: 8px;
             padding: 9px 24px;
-            background: linear-gradient(135deg, #1a56db, #4f46e5);
+            background: #1a56db;
             color: #fff;
             border: none;
             border-radius: 9px;

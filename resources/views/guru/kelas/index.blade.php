@@ -5,7 +5,7 @@
 
 @section('topbar-actions')
     <a href="{{ route('guru.kelas.create') }}"
-        style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:linear-gradient(135deg,#1a56db,#4f46e5);color:#fff;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;">
+        style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:#1a56db;color:#fff;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;">
         <i class="bi bi-plus-lg"></i> Tambah Kelas
     </a>
 @endsection
@@ -30,7 +30,7 @@
         <div
             style="background:#fff;border-radius:14px;border:1px solid #e9edf2;padding:20px;display:flex;align-items:center;gap:14px;">
             <div
-                style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#1a56db,#4f46e5);display:flex;align-items:center;justify-content:center;">
+                style="width:44px;height:44px;border-radius:11px;background:#1a56db;display:flex;align-items:center;justify-content:center;">
                 <i class="bi bi-building" style="color:#fff;font-size:20px;"></i>
             </div>
             <div>
@@ -41,7 +41,7 @@
         <div
             style="background:#fff;border-radius:14px;border:1px solid #e9edf2;padding:20px;display:flex;align-items:center;gap:14px;">
             <div
-                style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#0f766e,#0891b2);display:flex;align-items:center;justify-content:center;">
+                style="width:44px;height:44px;border-radius:11px;background:#0f766e;display:flex;align-items:center;justify-content:center;">
                 <i class="bi bi-people-fill" style="color:#fff;font-size:20px;"></i>
             </div>
             <div>
@@ -88,7 +88,7 @@
 
                 {{-- Ikon --}}
                 <div
-                    style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#1a56db20,#4f46e520);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    style="width:40px;height:40px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <i class="bi bi-building" style="color:#1a56db;font-size:17px;"></i>
                 </div>
 

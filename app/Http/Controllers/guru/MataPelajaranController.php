@@ -13,17 +13,26 @@ use Illuminate\Support\Facades\Storage;
 
 class MataPelajaranController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $guru   = Auth::user();
-        $mapels = MataPelajaran::where('Id_user', $guru->Id_user)
-            ->with(['kelas','kelas.walikelas'])
-            ->withCount('materis')
-            ->orderBy('kelas_id')
-            ->orderBy('urutan')
-            ->paginate(12);
+        $guru      = Auth::user();
+        $kelas_id  = $request->kelas_id;
 
-        return view('guru.mapel.index', compact('mapels'));
+        $kelasList = Kelas::orderBy('nama')->get();
+
+        $mapelsQuery = MataPelajaran::where('Id_user', $guru->Id_user)
+            ->with(['kelas','kelas.walikelas'])
+            ->withCount('materis');
+
+        if ($kelas_id) {
+            $mapelsQuery->where('kelas_id', $kelas_id);
+        }
+
+        $mapels = $mapelsQuery->orderBy('kelas_id')
+            ->orderBy('urutan')
+            ->get();
+
+        return view('guru.mapel.index', compact('mapels', 'kelasList', 'kelas_id'));
     }
 
     public function create()

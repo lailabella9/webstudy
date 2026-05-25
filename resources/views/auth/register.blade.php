@@ -50,7 +50,7 @@
         /* ── HERO ── */
         .hero-side {
             flex: 1 1 40%;
-            background: linear-gradient(145deg, #0f172a 0%, #1e3a8a 65%, #1d4ed8 100%);
+            background: #0f172a;
             position: relative;
             display: flex;
             flex-direction: column;
@@ -63,8 +63,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse 70% 60% at 85% 15%, rgba(147, 197, 253, .14) 0%, transparent 60%),
-                radial-gradient(ellipse 55% 50% at 10% 85%, rgba(139, 92, 246, .12) 0%, transparent 55%);
+            background: none;
             pointer-events: none;
         }
 
@@ -72,7 +71,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background-image: radial-gradient(rgba(255, 255, 255, .055) 1px, transparent 1px);
+            background-image: none;
             background-size: 32px 32px;
             pointer-events: none;
         }
@@ -121,10 +120,7 @@
         }
 
         .hero-title span {
-            background: linear-gradient(90deg, #93c5fd, #a5b4fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #93c5fd;
         }
 
         .hero-desc {
@@ -337,7 +333,7 @@
         .btn-submit {
             width: 100%;
             height: 50px;
-            background: linear-gradient(135deg, #1a56db, #1e429f);
+            background: #1a56db;
             border: none;
             border-radius: 12px;
             color: #fff;

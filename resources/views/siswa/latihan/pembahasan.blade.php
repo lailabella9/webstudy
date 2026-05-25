@@ -89,7 +89,7 @@
             onsubmit="return confirm('Reset semua jawaban dan kerjakan latihan ini dari awal?')">
             @csrf @method('DELETE')
             <button type="submit"
-                style="padding:10px 20px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                style="padding:10px 20px;background:#d97706;color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
                 <i class="bi bi-arrow-clockwise"></i> Kerjakan Ulang
             </button>
         </form>

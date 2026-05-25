@@ -18,7 +18,7 @@
         }
         .form-card-header-icon {
             width:34px; height:34px; border-radius:9px;
-            background:linear-gradient(135deg,#1a56db,#4f46e5);
+            background:#1a56db;
             display:flex; align-items:center; justify-content:center;
             color:#fff; font-size:15px; flex-shrink:0;
         }
@@ -64,7 +64,7 @@
         .avatar-edit-wrap:hover { border-color:#1a56db; }
         .avatar-preview {
             width:56px; height:56px; border-radius:50%;
-            background:linear-gradient(135deg,#1a56db,#4f46e5);
+            background:#1a56db;
             display:flex; align-items:center; justify-content:center;
             font-size:22px; font-weight:800; color:#fff; flex-shrink:0; overflow:hidden; position:relative;
         }
@@ -115,7 +115,7 @@
         .btn-cancel:hover { background:#f1f5f9; border-color:#cbd5e1; color:#374151; }
         .btn-submit {
             display:inline-flex; align-items:center; gap:8px; padding:9px 24px;
-            background:linear-gradient(135deg,#1a56db,#4f46e5); color:#fff; border:none;
+            background:#1a56db; color:#fff; border:none;
             border-radius:9px; font-size:13px; font-weight:600; cursor:pointer;
             font-family:'Plus Jakarta Sans',sans-serif; transition:opacity .15s, transform .1s;
             box-shadow:0 2px 8px rgba(26,86,219,.25);
@@ -367,9 +367,23 @@
 @push('scripts')
     <script>
         function submitDeleteForm() {
-            if (confirm("Yakin hapus akun ini? Semua data akan terhapus.")) {
-                document.getElementById('deleteForm').submit();
-            }
+            Swal.fire({
+                title: 'Konfirmasi Hapus',
+                text: 'Yakin hapus akun ini? Semua data akan terhapus.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'swal2-premium-popup'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteForm').submit();
+                }
+            });
         }
         function previewAvatar(input) {
             const preview = document.getElementById('avatarPreview');

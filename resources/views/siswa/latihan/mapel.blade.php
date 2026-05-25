@@ -13,7 +13,7 @@
 
     {{-- Info KKM --}}
     <div
-        style="background:linear-gradient(135deg,#1e3a5f,#1a56db);border-radius:14px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;">
+        style="background:#1a56db;border-radius:14px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;">
         <div
             style="width:44px;height:44px;border-radius:11px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <i class="bi bi-trophy-fill" style="color:#fbbf24;font-size:20px;"></i>
@@ -72,7 +72,7 @@
                 {{-- Nomor bab --}}
                 <div
                     style="width:42px;height:42px;border-radius:10px;
-                        background:{{ $locked ? '#e2e8f0' : 'linear-gradient(135deg,#1a56db,#4f46e5)' }};
+                        background:{{ $locked ? '#e2e8f0' : '#1a56db' }};
                         display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     @if ($locked)
                         <i class="bi bi-lock-fill" style="color:#94a3b8;font-size:18px;"></i>
@@ -115,7 +115,7 @@
             @if ($materi->konten && !$locked)
                 <div style="padding:14px 20px;border-bottom:1px solid #f8fafc;background:#fafbfc;">
                     <div style="font-size:12.5px;color:#475569;line-height:1.7;">
-                        {!! nl2br(e(\Illuminate\Support\Str::limit($materi->konten, 200))) !!}
+                        {{ \Illuminate\Support\Str::limit(strip_tags($materi->konten), 200) }}
                     </div>
                 </div>
             @endif
@@ -217,27 +217,33 @@
                                 @endif
                             </div>
 
-                            <div style="flex-shrink:0;display:flex;gap:6px;">
-                                @if ($kat['dijawab'] > 0)
-                                    <a href="{{ route('siswa.latihan.pembahasan', [$materi, $k]) }}"
-                                        style="padding:8px 14px;border:1.5px solid {{ $k->warna }}40;border-radius:9px;font-size:12.5px;font-weight:600;color:{{ $k->warna }};text-decoration:none;display:flex;align-items:center;gap:5px;">
-                                        <i class="bi bi-eye"></i> Pembahasan
-                                    </a>
-                                    {{-- Tombol Ulangi jika tidak lulus KKM --}}
-                                    @if ($kat['selesai'] && !$katLulus)
-                                        <a href="{{ route('siswa.latihan.ulangi', [$materi, $k]) }}"
-                                            onclick="return confirm('Reset semua jawaban latihan ini dan mulai dari awal?')"
-                                            style="padding:8px 14px;border:1.5px solid #fecaca;border-radius:9px;font-size:12.5px;font-weight:600;color:#dc2626;text-decoration:none;display:flex;align-items:center;gap:5px;background:#fef2f2;">
-                                            <i class="bi bi-arrow-clockwise"></i> Ulangi
+                            <div style="flex-shrink:0;display:flex;gap:6px;align-items:center;">
+                                @if ($canMulai)
+                                    @if ($kat['dijawab'] > 0)
+                                        <a href="{{ route('siswa.latihan.pembahasan', [$materi, $k]) }}"
+                                            style="padding:8px 14px;border:1.5px solid {{ $k->warna }}40;border-radius:9px;font-size:12.5px;font-weight:600;color:{{ $k->warna }};text-decoration:none;display:flex;align-items:center;gap:5px;">
+                                            <i class="bi bi-eye"></i> Pembahasan
                                         </a>
+                                        {{-- Tombol Ulangi jika tidak lulus KKM --}}
+                                        @if ($kat['selesai'] && !$katLulus)
+                                            <a href="{{ route('siswa.latihan.ulangi', [$materi, $k]) }}"
+                                                onclick="return confirm('Reset semua jawaban latihan ini dan mulai dari awal?')"
+                                                style="padding:8px 14px;border:1.5px solid #fecaca;border-radius:9px;font-size:12.5px;font-weight:600;color:#dc2626;text-decoration:none;display:flex;align-items:center;gap:5px;background:#fef2f2;">
+                                                <i class="bi bi-arrow-clockwise"></i> Ulangi
+                                            </a>
+                                        @endif
                                     @endif
+                                    <a href="{{ route('siswa.latihan.mulai', [$materi, $k]) }}"
+                                        style="padding:8px 18px;background:{{ $k->warna }};color:#fff;border-radius:9px;font-size:12.5px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:5px;transition:opacity .15s;"
+                                        onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+                                        <i class="bi bi-play-circle"></i>
+                                        {{ $kat['dijawab'] > 0 ? ($kat['selesai'] ? 'Lihat Hasil' : 'Lanjutkan') : 'Mulai' }}
+                                    </a>
+                                @else
+                                    <span style="font-size:11.5px;color:#dc2626;font-weight:600;display:flex;align-items:center;gap:4px;" title="Anda tidak dapat mengerjakan latihan untuk kelas lain.">
+                                        <i class="bi bi-lock-fill"></i> Anda tidak dapat mengerjakan latihan untuk kelas lain.
+                                    </span>
                                 @endif
-                                <a href="{{ route('siswa.latihan.mulai', [$materi, $k]) }}"
-                                    style="padding:8px 18px;background:{{ $k->warna }};color:#fff;border-radius:9px;font-size:12.5px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:5px;transition:opacity .15s;"
-                                    onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
-                                    <i class="bi bi-play-circle"></i>
-                                    {{ $kat['dijawab'] > 0 ? ($kat['selesai'] ? 'Lihat Hasil' : 'Lanjutkan') : 'Mulai' }}
-                                </a>
                             </div>
                         </div>
                     @endforeach
@@ -247,7 +253,7 @@
                 @if ($selesai && !$lulus)
                     <div style="padding:0 20px 16px;">
                         <div
-                            style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;">
+                            style="background:#fef3c7;border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;border:1px solid #fde68a;">
                             <div
                                 style="width:44px;height:44px;border-radius:11px;background:#f59e0b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                 <i class="bi bi-book-fill" style="color:#fff;font-size:20px;"></i>

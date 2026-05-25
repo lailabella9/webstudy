@@ -5,7 +5,7 @@
 
 @section('topbar-actions')
     <a href="{{ route('guru.materi.create') }}"
-        style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:linear-gradient(135deg,#1a56db,#4f46e5);color:#fff;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;">
+        style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:#1a56db;color:#fff;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;">
         <i class="bi bi-plus-lg"></i> Tambah Materi
     </a>
 @endsection
@@ -81,18 +81,13 @@
         </div>
 
         @forelse ($materis as $materi)
-            @php
-                $colors = ['#1a56db', '#4f46e5', '#0f766e', '#b45309', '#be185d', '#0369a1'];
-                $idx = crc32($materi->mataPelajaran->nama ?? '') % 6;
-                $c = $colors[$idx];
-            @endphp
             <div style="padding:14px 20px;border-bottom:1px solid #f8fafc;display:flex;align-items:center;gap:14px;"
                 onmouseover="this.style.background='#fafbff'" onmouseout="this.style.background=''">
 
                 {{-- Ikon --}}
                 <div
-                    style="width:42px;height:42px;border-radius:10px;background:{{ $c }}15;border:1px solid {{ $c }}30;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <i class="bi bi-journal-richtext" style="color:{{ $c }};font-size:17px;"></i>
+                    style="width:42px;height:42px;border-radius:10px;background:rgba(26,86,219,0.07);border:1px solid rgba(26,86,219,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-journal-richtext" style="color:#1a56db;font-size:17px;"></i>
                 </div>
 
                 {{-- Info --}}
@@ -100,7 +95,7 @@
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                         <span style="font-size:14px;font-weight:700;color:#0f172a;">{{ $materi->judul }}</span>
                         <span
-                            style="font-size:11px;background:{{ $c }}15;color:{{ $c }};padding:2px 9px;border-radius:20px;font-weight:600;">
+                            style="font-size:11px;background:rgba(26,86,219,0.07);color:#1a56db;padding:2px 9px;border-radius:20px;font-weight:600;">
                             Urutan {{ $materi->urutan }}
                         </span>
                         @if ($materi->file_materi)

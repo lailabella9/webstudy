@@ -46,13 +46,13 @@
             {{-- Status Lulus / Tidak Lulus --}}
             @if ($lulus)
                 <div
-                    style="display:inline-flex;align-items:center;gap:8px;padding:8px 22px;border-radius:24px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;margin-bottom:14px;">
+                    style="display:inline-flex;align-items:center;gap:8px;padding:8px 22px;border-radius:24px;background:#dcfce7;border:1.5px solid #86efac;margin-bottom:14px;">
                     <i class="bi bi-patch-check-fill" style="color:#16a34a;font-size:18px;"></i>
                     <span style="font-size:15px;font-weight:800;color:#15803d;">LULUS ✓</span>
                 </div>
             @else
                 <div
-                    style="display:inline-flex;align-items:center;gap:8px;padding:8px 22px;border-radius:24px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1.5px solid #fca5a5;margin-bottom:14px;">
+                    style="display:inline-flex;align-items:center;gap:8px;padding:8px 22px;border-radius:24px;background:#fee2e2;border:1.5px solid #fca5a5;margin-bottom:14px;">
                     <i class="bi bi-x-circle-fill" style="color:#dc2626;font-size:18px;"></i>
                     <span style="font-size:15px;font-weight:800;color:#b91c1c;">TIDAK LULUS ✗</span>
                 </div>
@@ -100,7 +100,7 @@
                 </a>
                 @if ($lulus && $nextMateri)
                     <a href="{{ route('siswa.latihan.mapel', $materi->mataPelajaran) }}"
-                        style="flex:1;text-align:center;padding:10px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+                        style="flex:1;text-align:center;padding:10px;background:#16a34a;color:#fff;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
                         <i class="bi bi-arrow-right-circle-fill"></i> Bab Berikutnya
                     </a>
                 @elseif ($lulus)
@@ -111,7 +111,7 @@
                 @else
                     <a href="{{ route('siswa.latihan.ulangi', [$materi, $kategori]) }}"
                         onclick="return confirm('Reset semua jawaban dan mulai ulang latihan ini?')"
-                        style="flex:1;text-align:center;padding:10px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+                        style="flex:1;text-align:center;padding:10px;background:#d97706;color:#fff;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
                         <i class="bi bi-arrow-clockwise"></i> Belajar Lagi
                     </a>
                 @endif
@@ -121,7 +121,7 @@
         {{-- Pesan KKM --}}
         @if (!$lulus)
             <div
-                style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border-radius:14px;border:1.5px solid #fcd34d;padding:18px 20px;margin-bottom:14px;">
+                style="background:#fef3c7;border-radius:14px;border:1.5px solid #fcd34d;padding:18px 20px;margin-bottom:14px;">
                 <div style="display:flex;align-items:flex-start;gap:12px;">
                     <div
                         style="width:42px;height:42px;border-radius:10px;background:#f59e0b;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -153,10 +153,10 @@
         @else
             {{-- Selamat Lulus --}}
             <div
-                style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:14px;border:1.5px solid #86efac;padding:18px 20px;margin-bottom:14px;">
+                style="background:#dcfce7;border-radius:14px;border:1.5px solid #86efac;padding:18px 20px;margin-bottom:14px;">
                 <div style="display:flex;align-items:center;gap:12px;">
                     <div
-                        style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        style="width:42px;height:42px;border-radius:10px;background:#16a34a;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                         <i class="bi bi-trophy-fill" style="color:#fff;font-size:18px;"></i>
                     </div>
                     <div>

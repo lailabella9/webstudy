@@ -21,9 +21,13 @@ class LatihanController extends Controller
     public function index()
     {
         $siswa  = Auth::user();
-        $mapels = MataPelajaran::withCount('materis')
-            //when($siswa->kelas_id, fn($q) => $q->where('kelas_id', $siswa->kelas_id))
 
+        $mapels = MataPelajaran::withCount('materis')
+            ->when($siswa->kelas_id, function ($q) use ($siswa) {
+                $q->where('kelas_id', $siswa->kelas_id);
+            }, function ($q) {
+                $q->whereNull('kelas_id');
+            })
             ->orderBy('urutan')
             ->paginate(12);
 
@@ -35,7 +39,11 @@ class LatihanController extends Controller
     {
         $siswa  = Auth::user();
         $mapels = MataPelajaran::orderBy('urutan')
-            
+            ->when($siswa->kelas_id, function ($q) use ($siswa) {
+                $q->where('kelas_id', $siswa->kelas_id);
+            }, function ($q) {
+                $q->whereNull('kelas_id');
+            })
             ->get()
             ->map(fn($mapel) => [
                 'mapel'   => $mapel,
@@ -49,6 +57,8 @@ class LatihanController extends Controller
     // ── DETAIL MAPEL: daftar bab + kategori yang AKTIF — dengan lock KKM ──
     public function mapel(MataPelajaran $mapel)
     {
+        abort_unless($this->checkKelasAksesMapel($mapel), 403, 'Anda tidak memiliki akses ke mata pelajaran ini.');
+
         $userId    = Auth::id();
         $kategoris = KategoriLatihan::orderBy('urutan')->get();
         $kkm       = self::KKM;
@@ -110,12 +120,16 @@ class LatihanController extends Controller
             return $item;
         });
 
-        return view('siswa.latihan.mapel', compact('mapel', 'materis', 'kategoris', 'kkm'));
+        $canMulai = $this->checkKelasAksesMapel($mapel);
+
+        return view('siswa.latihan.mapel', compact('mapel', 'materis', 'kategoris', 'kkm', 'canMulai'));
     }
 
     // ── MULAI LATIHAN ──
     public function mulai(Materi $materi, KategoriLatihan $kategori)
     {
+        abort_unless($this->checkKelasAkses($materi), 403, 'Anda tidak dapat mengerjakan latihan untuk kelas lain.');
+
         $akses = AksesLatihan::where('materi_id', $materi->Id_materi)
             ->where('kategori_id', $kategori->Id_kategori)->first();
         abort_unless($akses?->isAktif(), 403, 'Latihan ini belum dibuka oleh guru.');
@@ -127,8 +141,12 @@ class LatihanController extends Controller
             ->with('pilihanJawabans')->get()->shuffle();
         $sudahDijawab = HasilLatihan::where('Id_user', Auth::id())
             ->whereIn('Id_soal', $soals->pluck('Id_soal'))->pluck('Id_soal')->toArray();
+        $jawabanSiswa = HasilLatihan::where('Id_user', Auth::id())
+            ->whereIn('Id_soal', $soals->pluck('Id_soal'))
+            ->pluck('jawaban_siswa', 'Id_soal')
+            ->toArray();
 
-        return view('siswa.latihan.mulai', compact('materi', 'kategori', 'soals', 'sudahDijawab'));
+        return view('siswa.latihan.mulai', compact('materi', 'kategori', 'soals', 'sudahDijawab', 'jawabanSiswa'));
     }
 
     // ── JAWAB SOAL (AJAX) — simpan tanpa return feedback benar/salah ──
@@ -138,6 +156,8 @@ class LatihanController extends Controller
         if (HasilLatihan::where('Id_user', Auth::id())->where('Id_soal', $soal->Id_soal)->exists()) {
             return response()->json(['message' => 'Sudah dijawab.'], 422);
         }
+        abort_unless($this->checkKelasAkses($soal->materi), 403, 'Anda tidak dapat mengerjakan latihan untuk kelas lain.');
+
         $pilihan = $soal->pilihanJawabans()->findOrFail($request->pilihan_id);
         $isBenar = $pilihan->is_benar;
         HasilLatihan::create([
@@ -154,6 +174,8 @@ class LatihanController extends Controller
     // ── SELESAI ──
     public function selesai(Request $request, Materi $materi, KategoriLatihan $kategori)
     {
+        abort_unless($this->checkKelasAkses($materi), 403, 'Anda tidak dapat mengerjakan latihan untuk kelas lain.');
+
         $soalIds = $materi->soals()->where('kategori_id', $kategori->Id_kategori)->pluck('Id_soal');
         if (!HasilLatihan::where('Id_user', Auth::id())->whereIn('Id_soal', $soalIds)->exists()) {
             return response()->json(['message' => 'Belum mengerjakan soal.'], 422);
@@ -164,6 +186,8 @@ class LatihanController extends Controller
     // ── HASIL + KKM STATUS ──
     public function hasil(Materi $materi, KategoriLatihan $kategori)
     {
+        abort_unless($this->checkKelasAkses($materi), 403, 'Anda tidak dapat mengerjakan latihan untuk kelas lain.');
+
         $soalIds    = $materi->soals()->where('kategori_id', $kategori->Id_kategori)->pluck('Id_soal');
         $hasil      = HasilLatihan::where('Id_user', Auth::id())
             ->whereIn('Id_soal', $soalIds)->with('soal.pilihanJawabans')->get();
@@ -197,6 +221,8 @@ class LatihanController extends Controller
     // ── ULANGI LATIHAN (reset jawaban untuk dikerjakan ulang) ──
     public function ulangi(Materi $materi, KategoriLatihan $kategori)
     {
+        abort_unless($this->checkKelasAkses($materi), 403, 'Anda tidak dapat mengerjakan latihan untuk kelas lain.');
+
         $soalIds = $materi->soals()->where('kategori_id', $kategori->Id_kategori)->pluck('Id_soal');
         HasilLatihan::where('Id_user', Auth::id())->whereIn('Id_soal', $soalIds)->delete();
 
@@ -207,6 +233,8 @@ class LatihanController extends Controller
     // ── PEMBAHASAN ──
     public function pembahasan(Materi $materi, KategoriLatihan $kategori)
     {
+        abort_unless($this->checkKelasAkses($materi), 403, 'Anda tidak dapat mengerjakan latihan untuk kelas lain.');
+
         $soalIds = $materi->soals()->where('kategori_id', $kategori->Id_kategori)->pluck('Id_soal');
         abort_unless(
             HasilLatihan::where('Id_user', Auth::id())->whereIn('Id_soal', $soalIds)->exists(),
@@ -265,6 +293,7 @@ class LatihanController extends Controller
     // ── DOWNLOAD ──
     public function download(Materi $materi)
     {
+        abort_unless($this->checkKelasAkses($materi), 403, 'Anda tidak memiliki akses untuk mengunduh materi ini.');
         abort_unless($materi->hasFile(), 404);
 
         // Path absolut file di storage/app/public
@@ -277,6 +306,23 @@ class LatihanController extends Controller
         $filename = $materi->judul . '_' . basename($materi->file_materi);
 
         return response()->download($path, $filename);
+    }
+
+    // ── HELPER: cek akses kelas siswa berdasarkan materi ──
+    private function checkKelasAkses(Materi $materi): bool
+    {
+        return $this->checkKelasAksesMapel($materi->mataPelajaran);
+    }
+
+    // ── HELPER: cek akses kelas siswa berdasarkan mata pelajaran ──
+    private function checkKelasAksesMapel(MataPelajaran $mapel): bool
+    {
+        $siswa = Auth::user();
+        if (!$siswa) {
+            return false;
+        }
+
+        return $siswa->kelas_id !== null && $mapel->kelas_id !== null && $siswa->kelas_id === $mapel->kelas_id;
     }
 
     // ── HELPER: cek apakah bab terkunci ──

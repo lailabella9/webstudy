@@ -25,6 +25,44 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
+Route::get('/debug-db-check', function() {
+    $user = \App\Models\User::where('nama', 'like', '%bagus%')->first();
+    $mapel = \App\Models\MataPelajaran::find(4);
+    $akses = \App\Models\AksesLatihan::all();
+    $soals = \App\Models\Soal::all();
+    $materis = \App\Models\Materi::all();
+    
+    $res = [];
+    $res['user'] = $user ? [
+        'nama' => $user->nama,
+        'kelas_id' => $user->kelas_id,
+        'kelas_nama' => $user->kelas?->nama
+    ] : null;
+    $res['mapel'] = $mapel ? [
+        'nama' => $mapel->nama,
+        'kelas_id' => $mapel->kelas_id,
+        'kelas_nama' => $mapel->kelas?->nama
+    ] : null;
+    $res['materi'] = $materis->map(fn($m) => [
+        'Id_materi' => $m->Id_materi,
+        'judul' => $m->judul,
+        'mapel_id' => $m->mapel_id,
+        'soals_count' => $m->soals()->count(),
+    ]);
+    $res['soals'] = $soals->map(fn($s) => [
+        'Id_soal' => $s->Id_soal,
+        'materi_id' => $s->materi_id,
+        'kategori_id' => $s->kategori_id,
+    ]);
+    $res['akses'] = $akses->map(fn($a) => [
+        'materi_id' => $a->materi_id,
+        'kategori_id' => $a->kategori_id,
+        'is_buka' => $a->is_buka,
+        'is_aktif' => $a->isAktif()
+    ]);
+    return response()->json($res);
+});
+
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
     Route::get('/login',     [AuthController::class, 'showLogin'])->name('login');

@@ -37,7 +37,7 @@
                         display:flex;align-items:center;gap:12px;">
                 <div
                     style="width:36px;height:36px;border-radius:9px;
-                            background:linear-gradient(135deg,#1a56db,#4f46e5);
+                            background:#1a56db;
                             display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <i class="bi bi-journal-richtext" style="color:#fff;font-size:15px;"></i>
                 </div>

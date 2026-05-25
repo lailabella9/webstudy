@@ -11,11 +11,15 @@
             <select name="materi_id" onchange="this.form.submit()"
                 style="min-width:280px;height:40px;border:1.5px solid #e2e8f0;border-radius:9px;padding:0 14px;font-size:13px;background:#fff;outline:none;color:#0f172a;">
                 <option value="">— Pilih Materi —</option>
-                @foreach ($materis as $m)
-                    <option value="{{ $m->Id_materi }}"
-                        {{ optional($selected)->Id_materi == $m->Id_materi ? 'selected' : '' }}>
-                        {{ $m->judul }}
-                    </option>
+                @foreach ($materis->groupBy(fn($m) => $m->mataPelajaran->nama ?? 'Umum') as $mapelNama => $babList)
+                    <optgroup label="{{ $mapelNama }}">
+                        @foreach ($babList as $m)
+                            <option value="{{ $m->Id_materi }}"
+                                {{ optional($selected)->Id_materi == $m->Id_materi ? 'selected' : '' }}>
+                                {{ $m->judul }}
+                            </option>
+                        @endforeach
+                    </optgroup>
                 @endforeach
             </select>
         </div>

@@ -15,45 +15,104 @@ class StatistikController extends Controller
     public function progres(Request $request)
     {
         /** @var \App\Models\User $guru */
-        $guru    = Auth::user();
-        $materis = Materi::where('Id_user', $guru->Id_user)->withCount('soals')->orderBy('urutan')->get();
-        $siswa   = User::where('role', 'siswa')->orderBy('nama')->get();
+        $guru = Auth::user();
 
-        // Pre-load semua hasil latihan yang relevan — 1 query
-        $semuaSoalIds = $materis->flatMap(fn($m) => $m->soals()->pluck('Id_soal'));
+        // 1. Ambil semua kelas
+        $kelas_id  = $request->kelas_id;
+        $kelasList = \App\Models\Kelas::orderBy('nama')->get();
 
-        $hasilMap = HasilLatihan::whereIn('Id_soal', $semuaSoalIds)
-            ->selectRaw('Id_user, Id_soal, nilai')
-            ->get()
-            ->groupBy('Id_user'); // key: Id_user → collection hasil
+        // 2. Ambil semua mapel milik guru ini
+        $mapels = \App\Models\MataPelajaran::where('Id_user', $guru->Id_user)
+            ->with(['materis' => fn($q) => $q->orderBy('urutan')])
+            ->orderBy('urutan')
+            ->get();
 
-        // Total poin per materi (pre-compute)
-        $poinPerMateri = $materis->mapWithKeys(function ($m) {
-            return [$m->Id_materi => [
-                'soalIds'    => $m->soals()->pluck('Id_soal'),
-                'totalPoin'  => $m->soals()->sum('poin'),
-            ]];
-        });
+        // 3. Ambil semua siswa
+        $siswas = User::where('role', 'siswa')->orderBy('nama')->get();
 
-        // Bangun grid: siswa × materi → persentase
-        $grid = [];
-        foreach ($siswa as $s) {
-            $hasilSiswa = $hasilMap->get($s->Id_user, collect());
-            $row        = ['siswa' => $s, 'materi' => []];
+        // 4. Ambil semua materi milik guru ini
+        $materis = Materi::where('Id_user', $guru->Id_user)->get();
 
-            foreach ($materis as $m) {
-                $info      = $poinPerMateri[$m->Id_materi];
-                $diraih    = $hasilSiswa->whereIn('Id_soal', $info['soalIds']->toArray())->sum('nilai');
-                $totalPoin = $info['totalPoin'];
-
-                $row['materi'][$m->Id_materi] = ($totalPoin > 0 && $diraih > 0)
-                    ? round($diraih / $totalPoin * 100)
-                    : null;
-            }
-            $grid[] = $row;
+        // 5. Pre-compute total poin dan soal IDs per materi
+        $materiInfo = [];
+        $allSoalIds = [];
+        foreach ($materis as $m) {
+            $soalIds = $m->soals()->pluck('Id_soal')->toArray();
+            $totalPoin = $m->soals()->sum('poin');
+            $materiInfo[$m->Id_materi] = [
+                'soalIds' => $soalIds,
+                'totalPoin' => $totalPoin
+            ];
+            $allSoalIds = array_merge($allSoalIds, $soalIds);
         }
 
-        return view('guru.statistik.progres', compact('materis', 'siswa', 'grid'));
+        // 6. Ambil hasil latihan
+        $hasilMap = HasilLatihan::whereIn('Id_soal', $allSoalIds)
+            ->selectRaw('Id_user, Id_soal, nilai')
+            ->get()
+            ->groupBy('Id_user');
+
+        // 7. Bangun hirarki
+        $hierarchy = [];
+        $activeKelasList = $kelas_id 
+            ? $kelasList->where('Id_kelas', $kelas_id) 
+            : $kelasList;
+
+        foreach ($activeKelasList as $kelas) {
+            $kelasSiswa = $siswas->where('kelas_id', $kelas->Id_kelas);
+            $kelasMapels = $mapels->where('kelas_id', $kelas->Id_kelas);
+
+            if ($kelasSiswa->isEmpty() && $kelasMapels->isEmpty()) {
+                continue;
+            }
+
+            $mapelData = [];
+            foreach ($kelasMapels as $mapel) {
+                $babList = $mapel->materis;
+                if ($babList->isEmpty()) {
+                    continue;
+                }
+
+                $grid = [];
+                foreach ($kelasSiswa as $s) {
+                    $hasilSiswa = $hasilMap->get($s->Id_user, collect());
+                    $scores = [];
+                    foreach ($babList as $m) {
+                        $info = $materiInfo[$m->Id_materi] ?? ['soalIds' => [], 'totalPoin' => 0];
+                        if (empty($info['soalIds']) || $info['totalPoin'] == 0) {
+                            $scores[$m->Id_materi] = null;
+                        } else {
+                            $dijawab = $hasilSiswa->whereIn('Id_soal', $info['soalIds'])->count();
+                            if ($dijawab == 0) {
+                                $scores[$m->Id_materi] = null;
+                            } else {
+                                $diraih = $hasilSiswa->whereIn('Id_soal', $info['soalIds'])->sum('nilai');
+                                $scores[$m->Id_materi] = $info['totalPoin'] > 0 ? round($diraih / $info['totalPoin'] * 100) : 0;
+                            }
+                        }
+                    }
+                    $grid[] = [
+                        'siswa' => $s,
+                        'scores' => $scores
+                    ];
+                }
+
+                $mapelData[] = [
+                    'mapel' => $mapel,
+                    'babList' => $babList,
+                    'grid' => $grid
+                ];
+            }
+
+            if (!empty($mapelData)) {
+                $hierarchy[] = [
+                    'kelas' => $kelas,
+                    'mapelData' => $mapelData
+                ];
+            }
+        }
+
+        return view('guru.statistik.progres', compact('hierarchy', 'kelasList', 'kelas_id'));
     }
 
     // ── LAPORAN: statistik per materi dari hasil_latihan ──
@@ -61,7 +120,12 @@ class StatistikController extends Controller
     {
         /** @var \App\Models\User $guru */
         $guru     = Auth::user();
-        $materis  = Materi::where('Id_user', $guru->Id_user)->withCount('soals')->orderBy('urutan')->get();
+        $materis  = Materi::where('Id_user', $guru->Id_user)
+            ->with(['mataPelajaran'])
+            ->withCount('soals')
+            ->orderBy('mapel_id')
+            ->orderBy('urutan')
+            ->get();
         $selected = $request->materi_id ? Materi::find($request->materi_id) : $materis->first();
 
         $stats = null;
@@ -106,14 +170,34 @@ class StatistikController extends Controller
     {
         /** @var \App\Models\User $guru */
         $guru     = Auth::user();
-        $materis  = Materi::where('Id_user', $guru->Id_user)->get();
-        $selected = $request->materi_id
-            ? Materi::with('soals.pilihanJawabans')->find($request->materi_id)
+        $materiId = $request->materi_id;
+        $kategoriId = $request->kategori_id;
+
+        // Get all materials belonging to this teacher
+        $materis = Materi::where('Id_user', $guru->Id_user)
+            ->with(['mataPelajaran', 'mataPelajaran.kelas'])
+            ->orderBy('mapel_id')
+            ->orderBy('urutan')
+            ->get();
+
+        // Selected material
+        $selected = $materiId
+            ? Materi::find($materiId)
             : null;
+
+        // Get all categories for filter buttons
+        $kategoris = \App\Models\KategoriLatihan::orderBy('urutan')->get();
 
         $evaluasiData = [];
         if ($selected) {
-            foreach ($selected->soals as $soal) {
+            // Load questions of this material, optionally filtered by kategori_id
+            $soalsQuery = $selected->soals();
+            if ($kategoriId) {
+                $soalsQuery->where('kategori_id', $kategoriId);
+            }
+            $soals = $soalsQuery->with('pilihanJawabans')->get();
+
+            foreach ($soals as $soal) {
                 $jawaban = HasilLatihan::where('Id_soal', $soal->Id_soal)->with('user')->get();
                 $benar   = $jawaban->where('is_benar', true)->count();
                 $total   = $jawaban->count();
@@ -129,6 +213,6 @@ class StatistikController extends Controller
             }
         }
 
-        return view('guru.statistik.evaluasi', compact('materis', 'selected', 'evaluasiData'));
+        return view('guru.statistik.evaluasi', compact('materis', 'selected', 'evaluasiData', 'kategoris', 'kategoriId'));
     }
 }

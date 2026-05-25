@@ -8,6 +8,50 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <style>[x-cloak]{display:none!important}</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* SweetAlert2 Premium Custom Styles */
+        .swal2-premium-popup {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            border-radius: 16px !important;
+            padding: 24px !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+            border: 1px solid #f1f5f9 !important;
+        }
+        .swal2-premium-popup .swal2-title {
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            color: #0f172a !important;
+            margin-top: 10px !important;
+        }
+        .swal2-premium-popup .swal2-html-container {
+            font-size: 14px !important;
+            color: #475569 !important;
+            line-height: 1.6 !important;
+            margin: 12px 0 0 0 !important;
+        }
+        .swal2-premium-popup .swal2-actions {
+            margin-top: 24px !important;
+            gap: 8px !important;
+        }
+        .swal2-premium-popup .swal2-confirm, 
+        .swal2-premium-popup .swal2-cancel {
+            border-radius: 9px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            padding: 10px 20px !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            transition: all 0.15s ease-in-out !important;
+        }
+        .swal2-premium-popup .swal2-confirm:hover {
+            opacity: 0.9 !important;
+        }
+        .swal2-premium-popup .swal2-cancel:hover {
+            background-color: #cbd5e1 !important;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
@@ -83,6 +127,103 @@
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     @yield('content')
 </main>
-@stack('scripts')
+    <script>
+        // Global SweetAlert2 confirm interceptor
+        document.addEventListener('DOMContentLoaded', function() {
+            // Click listener for inline onclick="return confirm(...)"
+            document.addEventListener('click', function(e) {
+                let target = e.target.closest('[onclick*="confirm("]');
+                if (!target) return;
+
+                if (target.dataset.swalConfirmed === 'true') {
+                    return;
+                }
+
+                const onclickAttr = target.getAttribute('onclick');
+                const match = onclickAttr.match(/confirm\(['"](.*?)['"]\)/);
+                if (match) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const confirmMsg = match[1];
+                    const isDelete = confirmMsg.toLowerCase().includes('hapus') || confirmMsg.toLowerCase().includes('delete') || confirmMsg.toLowerCase().includes('reset');
+
+                    Swal.fire({
+                        title: isDelete ? 'Konfirmasi Tindakan' : 'Konfirmasi',
+                        text: confirmMsg.replace(/\\'/g, "'").replace(/\\"/g, '"'),
+                        icon: isDelete ? 'warning' : 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: isDelete ? '#dc2626' : '#1a56db',
+                        cancelButtonColor: '#94a3b8',
+                        confirmButtonText: isDelete ? 'Ya, Lanjutkan' : 'Ya',
+                        cancelButtonText: 'Batal',
+                        customClass: {
+                            popup: 'swal2-premium-popup'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            target.dataset.swalConfirmed = 'true';
+                            const origConfirm = window.confirm;
+                            window.confirm = () => true;
+                            target.click();
+                            window.confirm = origConfirm;
+                        }
+                    });
+                }
+            }, true);
+
+            // Submit listener for forms with inline onsubmit or logout
+            document.addEventListener('submit', function(e) {
+                const form = e.target;
+                if (form.dataset.swalConfirmed === 'true' || form.querySelector('[data-swal-confirmed="true"]')) {
+                    return;
+                }
+
+                const onsubmitAttr = form.getAttribute('onsubmit');
+                let confirmMsg = '';
+
+                if (onsubmitAttr && onsubmitAttr.includes('confirm(')) {
+                    const match = onsubmitAttr.match(/confirm\(['"](.*?)['"]\)/);
+                    if (match) {
+                        confirmMsg = match[1];
+                    }
+                }
+
+                // Check if the form is a logout form
+                const action = form.getAttribute('action') || '';
+                const isLogout = action.includes('logout');
+                if (!confirmMsg && isLogout) {
+                    confirmMsg = 'Apakah Anda yakin ingin keluar dari aplikasi?';
+                }
+
+                if (confirmMsg) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const isDelete = confirmMsg.toLowerCase().includes('hapus') || confirmMsg.toLowerCase().includes('delete') || confirmMsg.toLowerCase().includes('reset');
+
+                    Swal.fire({
+                        title: isLogout ? 'Keluar Aplikasi' : (isDelete ? 'Konfirmasi Hapus' : 'Konfirmasi'),
+                        text: confirmMsg.replace(/\\'/g, "'").replace(/\\"/g, '"'),
+                        icon: isLogout ? 'question' : (isDelete ? 'warning' : 'question'),
+                        showCancelButton: true,
+                        confirmButtonColor: isDelete ? '#dc2626' : '#1a56db',
+                        cancelButtonColor: '#94a3b8',
+                        confirmButtonText: isLogout ? 'Ya, Keluar' : (isDelete ? 'Ya, Hapus' : 'Ya, Lanjutkan'),
+                        cancelButtonText: 'Batal',
+                        customClass: {
+                            popup: 'swal2-premium-popup'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.dataset.swalConfirmed = 'true';
+                            form.submit();
+                        }
+                    });
+                }
+            }, true);
+        });
+    </script>
+    @stack('scripts')
 </body>
 </html>

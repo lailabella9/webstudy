@@ -85,7 +85,7 @@
 
                 {{-- Ikon materi --}}
                 <div
-                    style="width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,#1a56db,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    style="width:38px;height:38px;border-radius:9px;background:#1a56db;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <i class="bi bi-journal-richtext" style="color:#fff;font-size:16px;"></i>
                 </div>
 

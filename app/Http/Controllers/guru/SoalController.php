@@ -20,9 +20,14 @@ class SoalController extends Controller
         $guru = Auth::user();
 
         $search    = $request->search;
+        $kelas_id  = $request->kelas_id;
+        $kelasList = \App\Models\Kelas::orderBy('nama')->get();
         $kategoris = KategoriLatihan::orderBy('urutan')->get();
 
         $mapels = MataPelajaran::where('Id_user', $guru->Id_user)
+            ->when($kelas_id, function ($q) use ($kelas_id) {
+                $q->where('kelas_id', $kelas_id);
+            })
             ->with(['materis' => function ($q) use ($search) {
                 $q->withCount(['soals as total_soal'])
                     ->orderBy('urutan');
@@ -49,7 +54,9 @@ class SoalController extends Controller
             'soalPerMateriKategori',
             'totalSoal',
             'totalMateri',
-            'search'
+            'search',
+            'kelasList',
+            'kelas_id'
         ));
     }
 

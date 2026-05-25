@@ -15,9 +15,9 @@
 
         {{-- Info siswa di kelas ini --}}
         <div
-            style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:14px;border:1px solid #bae6fd;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+            style="background:#eff6ff;border-radius:14px;border:1px solid #bae6fd;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
             <div
-                style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#0ea5e9,#0284c7);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                style="width:44px;height:44px;border-radius:11px;background:#0ea5e9;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <i class="bi bi-people-fill" style="color:#fff;font-size:18px;"></i>
             </div>
             <div>
@@ -33,7 +33,7 @@
 
             {{-- Header --}}
             <div
-                style="padding:20px 24px;border-bottom:1px solid #f1f5f9;background:linear-gradient(135deg,#1a56db,#4f46e5);display:flex;align-items:center;gap:14px;">
+                style="padding:20px 24px;border-bottom:1px solid #f1f5f9;background:#1a56db;display:flex;align-items:center;gap:14px;">
                 <div
                     style="width:44px;height:44px;border-radius:11px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;">
                     <i class="bi bi-pencil-fill" style="color:#fff;font-size:18px;"></i>
@@ -72,7 +72,7 @@
                         Preview</div>
                     <div style="display:flex;align-items:center;gap:10px;">
                         <div
-                            style="width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#1a56db,#4f46e5);display:flex;align-items:center;justify-content:center;">
+                            style="width:36px;height:36px;border-radius:9px;background:#1a56db;display:flex;align-items:center;justify-content:center;">
                             <i class="bi bi-building" style="color:#fff;font-size:15px;"></i>
                         </div>
                         <div>
@@ -90,7 +90,7 @@
                         Batal
                     </a>
                     <button type="submit"
-                        style="flex:2;padding:11px;background:linear-gradient(135deg,#1a56db,#4f46e5);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;">
+                        style="flex:2;padding:11px;background:#1a56db;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;">
                         <i class="bi bi-check-lg"></i> Simpan Perubahan
                     </button>
                 </div>

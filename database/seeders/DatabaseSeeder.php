@@ -92,7 +92,7 @@ class DatabaseSeeder extends Seeder
         // ══════════════════════════════════════════
 
         // ── MATEMATIKA ──────────────────────────
-        $this->buatBab($guru->Id_user, $mapelMatematika, $kphpategoriIds, [
+        $this->buatBab($guru->Id_user, $mapelMatematika, $kategoriIds, [
             [
                 'judul'     => 'Bab 1 — Bilangan Bulat',
                 'deskripsi' => 'Pengenalan bilangan bulat positif, negatif, dan nol.',

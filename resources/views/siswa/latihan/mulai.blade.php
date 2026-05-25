@@ -10,7 +10,50 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        /* SweetAlert2 Premium Custom Styles */
+        .swal2-premium-popup {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            border-radius: 16px !important;
+            padding: 24px !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+            border: 1px solid #f1f5f9 !important;
+        }
+        .swal2-premium-popup .swal2-title {
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            color: #0f172a !important;
+            margin-top: 10px !important;
+        }
+        .swal2-premium-popup .swal2-html-container {
+            font-size: 14px !important;
+            color: #475569 !important;
+            line-height: 1.6 !important;
+            margin: 12px 0 0 0 !important;
+        }
+        .swal2-premium-popup .swal2-actions {
+            margin-top: 24px !important;
+            gap: 8px !important;
+        }
+        .swal2-premium-popup .swal2-confirm, 
+        .swal2-premium-popup .swal2-cancel {
+            border-radius: 9px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            padding: 10px 20px !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            transition: all 0.15s ease-in-out !important;
+        }
+        .swal2-premium-popup .swal2-confirm:hover {
+            opacity: 0.9 !important;
+        }
+        .swal2-premium-popup .swal2-cancel:hover {
+            background-color: #cbd5e1 !important;
+        }
+
         :root {
             --sidebar-w: 210px;
             --brand: {{ $kategori->warna }};
@@ -53,7 +96,7 @@
             width: 36px;
             height: 36px;
             border-radius: 9px;
-            background: linear-gradient(135deg, #3b82f6, #818cf8);
+            background: #1a56db;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -141,7 +184,7 @@
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #3b82f6, #818cf8);
+            background: #1a56db;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -366,6 +409,38 @@
             border-color: var(--brand);
             background: color-mix(in srgb, var(--brand) 12%, white);
             color: #0f172a;
+        }
+
+        /* Custom Colors for Choice Buttons */
+        .pilihan-btn.pilihan-0:hover:not(:disabled),
+        .pilihan-btn.pilihan-0.dipilih {
+            border-color: #1a56db;
+            background-color: #eff6ff;
+            color: #1a56db;
+        }
+        .pilihan-btn.pilihan-1:hover:not(:disabled),
+        .pilihan-btn.pilihan-1.dipilih {
+            border-color: #4f46e5;
+            background-color: #f5f3ff;
+            color: #4f46e5;
+        }
+        .pilihan-btn.pilihan-2:hover:not(:disabled),
+        .pilihan-btn.pilihan-2.dipilih {
+            border-color: #0f766e;
+            background-color: #f0fdfa;
+            color: #0f766e;
+        }
+        .pilihan-btn.pilihan-3:hover:not(:disabled),
+        .pilihan-btn.pilihan-3.dipilih {
+            border-color: #b45309;
+            background-color: #fffbeb;
+            color: #b45309;
+        }
+        .pilihan-btn.pilihan-4:hover:not(:disabled),
+        .pilihan-btn.pilihan-4.dipilih {
+            border-color: #be185d;
+            background-color: #fdf2f8;
+            color: #be185d;
         }
 
         /* Saat semua soal selesai, tampilkan hasil jawaban */
@@ -685,7 +760,10 @@
                             <div class="soal-text">{{ $soal->pertanyaan }}</div>
                             <div id="pilihan-wrap-{{ $soal->Id_soal }}">
                                 @foreach ($soal->pilihanJawabans as $pi => $pilihan)
-                                    <button type="button" class="pilihan-btn {{ $sudah ? 'dipilih' : '' }}"
+                                    @php
+                                        $isDipilih = isset($jawabanSiswa[$soal->Id_soal]) && $jawabanSiswa[$soal->Id_soal] === $pilihan->teks_pilihan;
+                                    @endphp
+                                    <button type="button" class="pilihan-btn pilihan-{{ $pi }} {{ $isDipilih ? 'dipilih' : '' }}"
                                         id="btn-{{ $soal->Id_soal }}-{{ $pilihan->Id_pilihan }}"
                                         data-soal="{{ $soal->Id_soal }}" data-pilihan="{{ $pilihan->Id_pilihan }}"
                                         data-idx="{{ $i }}"
@@ -713,10 +791,6 @@
                             <button class="btn-nav" onclick="prevSoal({{ $i }})"
                                 {{ $i === 0 ? 'disabled' : '' }}>
                                 <i class="bi bi-arrow-left"></i> Sebelumnya
-                            </button>
-                            <button class="btn-nav btn-tandai" id="tandai-{{ $i }}"
-                                onclick="tandaiSoal({{ $i }}, {{ $soal->Id_soal }})">
-                                <i class="bi bi-flag"></i> Tandai
                             </button>
                             @if ($i < $soals->count() - 1)
                                 <button class="btn-nav primary" onclick="nextSoal({{ $i }})">
@@ -749,9 +823,6 @@
                         </div>
                         <div class="leg">
                             <div class="leg-dot" style="background:var(--brand);"></div>Aktif
-                        </div>
-                        <div class="leg">
-                            <div class="leg-dot" style="background:#f59e0b;"></div>Ditandai
                         </div>
                     </div>
                     <button class="btn-submit" onclick="akhiriLatihan()">Submit Jawaban</button>
@@ -862,12 +933,31 @@
 
         function akhiriLatihan() {
             const belumDijawab = totalSoal - dijawab.size;
+            let confirmMsg = 'Semua soal sudah dijawab. Submit sekarang?';
             if (belumDijawab > 0) {
-                if (!confirm(`Masih ada ${belumDijawab} soal belum dijawab. Yakin ingin mengakhiri?`)) return;
-            } else {
-                if (!confirm('Semua soal sudah dijawab. Submit sekarang?')) return;
+                confirmMsg = `Masih ada ${belumDijawab} soal belum dijawab. Yakin ingin mengakhiri?`;
             }
 
+            Swal.fire({
+                title: 'Akhiri Latihan',
+                text: confirmMsg,
+                icon: belumDijawab > 0 ? 'warning' : 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#1a56db',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, Selesai',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'swal2-premium-popup'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitLatihan();
+                }
+            });
+        }
+
+        function submitLatihan() {
             fetch('/siswa/latihan/{{ $materi->Id_materi }}/{{ $kategori->Id_kategori }}/selesai', {
                     method: 'POST',
                     headers: {

@@ -11,9 +11,36 @@
 
 @section('content')
 
+    {{-- Filter Bar --}}
+    <div style="background:#fff;border-radius:14px;border:1px solid #e9edf2;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <form method="GET" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;">
+            <label style="font-size:13px;font-weight:600;color:#475569;" for="kelas_id">Pilih Kelas / Jurusan:</label>
+            <select name="kelas_id" id="kelas_id" onchange="this.form.submit()"
+                style="height:36px;padding:0 12px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;color:#374151;outline:none;font-family:inherit;background:#fff;min-width:180px;cursor:pointer;">
+                <option value="">Semua Kelas & Jurusan</option>
+                @foreach ($kelasList as $k)
+                    <option value="{{ $k->Id_kelas }}" {{ $kelas_id == $k->Id_kelas ? 'selected' : '' }}>
+                        {{ $k->nama }}
+                    </option>
+                @endforeach
+            </select>
+            @if ($kelas_id)
+                <a href="{{ route('guru.mapel.index') }}"
+                    style="height:36px;padding:0 14px;border:1.5px solid #e2e8f0;border-radius:9px;background:#fff;font-size:13px;color:#64748b;display:inline-flex;align-items:center;text-decoration:none;">
+                    ✕ Reset
+                </a>
+            @endif
+        </form>
+    </div>
+
     {{-- Group mapels by kelas --}}
     @php
-        $byKelas = $mapels->getCollection()->groupBy(fn($m) => $m->kelas?->nama ?? 'KELAS X');
+        $byKelas = $mapels->groupBy(function($mapel) {
+            if ($mapel->kelas && preg_match('/^(\d+)/', $mapel->kelas->nama, $matches)) {
+                return 'Kelas ' . $matches[1];
+            }
+            return 'Lainnya';
+        });
     @endphp
 
     @forelse($byKelas as $kelasNama => $items)
@@ -32,18 +59,13 @@
 
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
                 @foreach ($items as $mapel)
-                    @php
-                        $colors = ['#1a56db', '#4f46e5', '#0f766e', '#b45309', '#be185d', '#0369a1'];
-                        $c = $colors[crc32($mapel->nama) % 6];
-                        $c2 = $colors[(crc32($mapel->nama) + 2) % 6];
-                    @endphp
                     <div
                         style="background:#fff;border-radius:14px;border:1px solid #e9edf2;
                             overflow:hidden;display:flex;flex-direction:column;">
 
                         {{-- Header --}}
                         <div
-                            style="height:90px;background:linear-gradient(135deg,{{ $c }},{{ $c2 }});
+                            style="height:90px;background:#1a56db;
                                 display:flex;align-items:center;padding:0 20px;position:relative;">
                             <div style="font-size:28px;font-weight:800;color:rgba(255,255,255,.2);font-style:italic;">
                                 {{ strtoupper(substr($mapel->nama, 0, 2)) }}
@@ -79,7 +101,7 @@
                             @endif
                             <div style="display:flex;gap:8px;flex-wrap:wrap;">
                                 <a href="{{ route('guru.mapel.kelola', $mapel) }}"
-                                    style="flex:1;text-align:center;background:{{ $c }};color:#fff;
+                                    style="flex:1;text-align:center;background:#1a56db;color:#fff;
                                        border-radius:8px;padding:8px;font-size:12.5px;font-weight:600;text-decoration:none;">
                                     <i class="bi bi-grid-3x3-gap me-1"></i> Kelola Bab & Akses
                                 </a>
@@ -117,8 +139,6 @@
         </div>
     @endforelse
 
-    @if ($mapels->hasPages())
-        <div style="margin-top:20px;">{{ $mapels->links() }}</div>
-    @endif
+
 
 @endsection

@@ -16,12 +16,12 @@
             {{-- Foto & Info --}}
             <div style="background:#fff; border-radius:14px; border:1px solid #e9edf2; overflow:hidden;">
                 {{-- Cover --}}
-                <div style="height:90px; background:linear-gradient(135deg,#1a56db,#4f46e5);"></div>
+                <div style="height:90px; background:#1a56db;"></div>
                 {{-- Avatar --}}
                 <div style="padding:0 20px 20px; position:relative;">
                     <div style="position:relative; width:72px; margin-top:-36px; margin-bottom:12px;">
                         <div
-                            style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#818cf8);border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;overflow:hidden;">
+                            style="width:72px;height:72px;border-radius:50%;background:#1a56db;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;overflow:hidden;">
                             @if ($user->foto_profil)
                                 <img src="{{ asset('storage/' . $user->foto_profil) }}"
                                     style="width:100%;height:100%;object-fit:cover;" alt="">
@@ -38,7 +38,7 @@
                     <div style="font-size:15px;font-weight:700;color:#0f172a;">{{ $user->nama }}</div>
                     <div style="font-size:12px;color:#64748b;margin-top:2px;">Guru / Admin</div>
                     <div style="font-size:12px;color:#94a3b8;margin-top:1px;">{{ $user->email }}</div>
-
+ 
                     {{-- Stat mini --}}
                     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;">
                         <div style="background:#f8fafc;border-radius:8px;padding:8px;text-align:center;">
@@ -55,7 +55,7 @@
                         </div>
                     </div>
                 </div>
-
+ 
                 {{-- Info List --}}
                 <div style="border-top:1px solid #f1f5f9; padding:14px 20px;">
                     @foreach ([['bi-envelope', 'Email', $user->email], ['bi-person-badge', 'Role', 'Guru / Admin'], ['bi-calendar3', 'Bergabung', $user->created_at->format('d M Y')]] as [$ic, $lbl, $val])
@@ -69,7 +69,7 @@
                     @endforeach
                 </div>
             </div>
-
+ 
             {{-- Mata Pelajaran --}}
             <div style="background:#fff; border-radius:14px; border:1px solid #e9edf2; padding:18px 20px;">
                 <div
@@ -80,7 +80,7 @@
                     <div
                         style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;background:#f8fafc;margin-bottom:7px;">
                         <div
-                            style="width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#1a56db,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            style="width:34px;height:34px;border-radius:8px;background:#1a56db;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <i class="bi bi-journal-richtext" style="font-size:14px;color:#fff;"></i>
                         </div>
                         <div>
