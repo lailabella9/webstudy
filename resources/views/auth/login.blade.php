@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,225 +7,86 @@
     <title>Masuk — WebStudy CBT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="shortcut icon" href="{{ asset('logo.png') }}">
     <style>
         :root {
             --brand: #1a56db;
             --brand-dark: #1e429f;
-            --hero-bg: #0f172a;
-        }
-
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
             font-family: 'DM Sans', sans-serif;
-            background: #f1f5f9;
+            background: #0f172a;
             min-height: 100vh;
-        }
-
-        /* TOP BAR */
-        .top-bar {
-            background: #0f172a;
-            color: rgba(255, 255, 255, .45);
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: .14em;
-            text-transform: uppercase;
-            text-align: center;
-            padding: 10px;
-        }
-
-        /* LAYOUT */
-        .page-wrap {
             display: flex;
-            min-height: calc(100vh - 40px);
-        }
-
-        /* ── HERO SIDE ── */
-        .hero-side {
-            flex: 1 1 58%;
-            background: #0f172a;
-            position: relative;
-            display: flex;
-            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            padding: 60px 64px;
+            position: relative;
             overflow: hidden;
+            margin: 0;
+            padding: 20px;
         }
 
-        .hero-side::before {
+        body::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: none;
-            pointer-events: none;
-        }
-
-        .hero-side::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: none;
             background-size: 32px 32px;
             pointer-events: none;
+            opacity: 0.3;
         }
 
-        .brand-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, .08);
-            border: 1px solid rgba(255, 255, 255, .13);
-            border-radius: 50px;
-            padding: 7px 18px 7px 8px;
-            margin-bottom: 40px;
-            width: fit-content;
-            position: relative;
-            z-index: 1;
-        }
-
-        .brand-icon {
-            width: 32px;
-            height: 32px;
-            background: #ffffff;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        .brand-name {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 800;
-            font-size: 15px;
-            color: #fff;
-        }
-
-        .hero-title {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 800;
-            font-size: clamp(30px, 3.2vw, 46px);
-            color: #fff;
-            line-height: 1.18;
-            margin-bottom: 18px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-title span {
-            color: #93c5fd;
-        }
-
-        .hero-desc {
-            color: rgba(255, 255, 255, .65);
-            font-size: 15px;
-            line-height: 1.7;
-            max-width: 440px;
-            margin-bottom: 8px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-sub {
-            color: rgba(255, 255, 255, .35);
-            font-size: 13px;
-            margin-bottom: 44px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .feature-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 11px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            background: rgba(255, 255, 255, .055);
-            border: 1px solid rgba(255, 255, 255, .09);
-            border-radius: 12px;
-            padding: 13px 18px;
-            color: rgba(255, 255, 255, .85);
-            font-size: 14px;
-            font-weight: 500;
-            transition: background .2s;
-        }
-
-        .feature-item:hover {
-            background: rgba(255, 255, 255, .09);
-        }
-
-        .ficon {
-            width: 36px;
-            height: 36px;
-            border-radius: 9px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 17px;
-            flex-shrink: 0;
-        }
-
-        .fi-b {
-            background: rgba(59, 130, 246, .3);
-            color: #93c5fd;
-        }
-
-        .fi-i {
-            background: rgba(99, 102, 241, .3);
-            color: #a5b4fc;
-        }
-
-        .fi-t {
-            background: rgba(20, 184, 166, .3);
-            color: #5eead4;
-        }
-
-        .fi-a {
-            background: rgba(245, 158, 11, .25);
-            color: #fcd34d;
-        }
-
-        /* ── FORM SIDE ── */
-        .form-side {
-            flex: 0 0 42%;
+        /* ── MODAL BOX ── */
+        .login-box {
             background: #fff;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 52px 52px;
-            box-shadow: -6px 0 48px rgba(0, 0, 0, .1);
+            width: 100%;
+            max-width: 440px;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 10;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .brand-logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .brand-logo img {
+            width: 56px;
+            height: 56px;
+            background: #f1f5f9;
+            border-radius: 14px;
+            padding: 8px;
         }
 
         .form-title {
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 800;
-            font-size: 26px;
+            font-size: 24px;
             color: #0f172a;
-            margin-bottom: 6px;
+            text-align: center;
+            margin-bottom: 8px;
         }
 
         .form-sub {
             font-size: 14px;
             color: #64748b;
+            text-align: center;
             margin-bottom: 32px;
-            line-height: 1.5;
         }
 
         .lbl {
@@ -317,7 +177,7 @@
         .btn-submit {
             width: 100%;
             height: 50px;
-            background: #1a56db;
+            background: var(--brand);
             border: none;
             border-radius: 12px;
             color: #fff;
@@ -333,7 +193,7 @@
         }
 
         .btn-submit:hover {
-            opacity: .92;
+            background: var(--brand-dark);
             transform: translateY(-1px);
         }
 
@@ -391,115 +251,84 @@
         .mb14 {
             margin-bottom: 14px;
         }
-
-        @media (max-width: 860px) {
-            .page-wrap {
-                flex-direction: column;
-            }
-
-            .hero-side {
-                padding: 48px 28px;
-            }
-
-            .form-side {
-                flex: 1;
-                padding: 40px 28px;
-                box-shadow: none;
-            }
+        
+        .back-link {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+            transition: color 0.2s;
+        }
+        
+        .back-link:hover {
+            color: #fff;
         }
     </style>
 </head>
 
 <body>
-    <div class="page-wrap">
-        <!-- HERO -->
-        <div class="hero-side">
-            <div class="brand-badge">
-                <div class="brand-icon"><img src="{{ asset('logo.png') }}" alt="" width="32" height="32">
-                </div>
-                <span class="brand-name">WebStudy CBT</span>
-            </div>
-            <h1 class="hero-title">
-                Platform Ujian<br>
-                <span>Berbasis Komputer</span><br>
-                Terpercaya
-            </h1>
-            <p class="hero-desc">
-                Sistem CBT modern untuk guru dan siswa. Kelola materi, soal, dan pantau
-                perkembangan belajar secara real-time dalam satu platform terpadu.
-            </p>
-            <p class="hero-sub">Dipercaya oleh ribuan pengguna aktif</p>
-            <ul class="feature-list">
-                <li class="feature-item">
-                    <div class="ficon fi-b"><i class="bi bi-lightning-charge-fill"></i></div>
-                    Ujian Online Real-time dengan Timer Otomatis
-                </li>
-                <li class="feature-item">
-                    <div class="ficon fi-i"><i class="bi bi-bar-chart-fill"></i></div>
-                    Statistik & Laporan Nilai Lengkap
-                </li>
-                <li class="feature-item">
-                    <div class="ficon fi-t"><i class="bi bi-journal-richtext"></i></div>
-                    Kelola Materi dan Soal dengan Mudah
-                </li>
-                <li class="feature-item">
-                    <div class="ficon fi-a"><i class="bi bi-shield-check"></i></div>
-                    Keamanan Akun Berlapis untuk Semua Pengguna
-                </li>
-            </ul>
+    <a href="{{ url('/') }}" class="back-link"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+
+    <div class="login-box">
+        <div class="brand-logo">
+            <img src="{{ asset('logo.png') }}" alt="Logo" onerror="this.style.display='none'">
         </div>
+        <h2 class="form-title">Selamat Datang</h2>
+        <p class="form-sub">Masuk ke akun Anda untuk melanjutkan</p>
 
-        <!-- FORM -->
-        <div class="form-side">
-            <h2 class="form-title">Selamat Datang</h2>
-            <p class="form-sub">Masuk ke akun Anda untuk melanjutkan</p>
-
-            @if ($errors->any())
-                <div class="alert-err">
-                    <i class="bi bi-exclamation-circle-fill mt-1"></i>
-                    <span>{{ $errors->first() }}</span>
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('login.submit') }}">
-                @csrf
-                <div class="mb14">
-                    <label class="lbl">Alamat Email</label>
-                    <input type="email" name="email" value="{{ old('email') }}"
-                        class="finput {{ $errors->has('email') ? 'err' : '' }}" placeholder="nama@email.com" required
-                        autofocus>
-                </div>
-                <div class="mb14">
-                    <label class="lbl">Password</label>
-                    <div class="input-wrap">
-                        <input type="password" name="password" id="pw"
-                            class="finput {{ $errors->has('password') ? 'err' : '' }}" placeholder="Masukkan password"
-                            required>
-                        <button type="button" class="eye-btn" onclick="togglePw()">
-                            <i class="bi bi-eye-slash" id="pw-ic"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="row-mid">
-                    <div class="d-flex align-items-center gap-2">
-                        <input class="form-check-input m-0" type="checkbox" name="remember" id="rem">
-                        <label for="rem">Ingat saya</label>
-                    </div>
-                    <a href="#" class="forgot">Lupa password?</a>
-                </div>
-                <button type="submit" class="btn-submit">
-                    <i class="bi bi-box-arrow-in-right"></i> Masuk Sekarang
-                </button>
-            </form>
-
-            <div class="divider">atau</div>
-            <div class="signup-row">
-                Belum punya akun? <a href="{{ route('register') }}">Daftar Sekarang</a>
+        @if ($errors->any())
+            <div class="alert-err">
+                <i class="bi bi-exclamation-circle-fill mt-1"></i>
+                <span>{{ $errors->first() }}</span>
             </div>
+        @endif
+
+        <form method="POST" action="{{ route('login.submit') }}">
+            @csrf
+            <div class="mb14">
+                <label class="lbl">Alamat Email</label>
+                <input type="email" name="email" value="{{ old('email') }}"
+                    class="finput {{ $errors->has('email') ? 'err' : '' }}" placeholder="nama@email.com" required
+                    autofocus>
+            </div>
+            <div class="mb14">
+                <label class="lbl">Password</label>
+                <div class="input-wrap">
+                    <input type="password" name="password" id="pw"
+                        class="finput {{ $errors->has('password') ? 'err' : '' }}" placeholder="Masukkan password"
+                        required>
+                    <button type="button" class="eye-btn" onclick="togglePw()">
+                        <i class="bi bi-eye-slash" id="pw-ic"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row-mid">
+                <div class="d-flex align-items-center gap-2">
+                    <input class="form-check-input m-0" type="checkbox" name="remember" id="rem">
+                    <label for="rem">Ingat saya</label>
+                </div>
+                <a href="#" class="forgot">Lupa password?</a>
+            </div>
+            <button type="submit" class="btn-submit">
+                Masuk Sekarang <i class="bi bi-box-arrow-in-right"></i>
+            </button>
+        </form>
+
+        @if (Route::has('register'))
+        <div class="divider">atau</div>
+        <div class="signup-row">
+            Belum punya akun? <a href="{{ route('register') }}">Daftar Sekarang</a>
         </div>
+        @endif
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function togglePw() {
             const f = document.getElementById('pw');
@@ -509,5 +338,4 @@
         }
     </script>
 </body>
-
 </html>

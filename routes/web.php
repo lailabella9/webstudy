@@ -22,7 +22,7 @@ Route::get('/', function () {
             ? redirect()->route('guru.dashboard')
             : redirect()->route('siswa.dashboard');
     }
-    return redirect()->route('login');
+    return view('landing');
 })->name('home');
 
 Route::get('/debug-db-check', function() {
