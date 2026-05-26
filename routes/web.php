@@ -11,6 +11,10 @@ use App\Http\Controllers\Guru\MataPelajaranController;
 use App\Http\Controllers\Guru\KelolaSiswaController;
 use App\Http\Controllers\Guru\StatistikController;
 use App\Http\Controllers\Guru\KelasController;        // ← tambah
+use App\Http\Controllers\Admin\DashboardController   as AdminDashboard;
+use App\Http\Controllers\Admin\KelolaGuruController  as AdminGuru;
+use App\Http\Controllers\Admin\KelolaSiswaController as AdminSiswa;
+use App\Http\Controllers\Admin\StatistikController   as AdminStatistik;
 use App\Http\Controllers\Siswa\DashboardController   as SiswaDashboard;
 use App\Http\Controllers\Siswa\LatihanController     as SiswaLatihan;
 
@@ -18,6 +22,11 @@ Route::get('/', function () {
     if (Auth::check()) {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+        
         return $user->isGuru()
             ? redirect()->route('guru.dashboard')
             : redirect()->route('siswa.dashboard');
@@ -72,6 +81,21 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+// ── ADMIN ─────────────────────────────────────────────────────────────────────
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+
+    // ── GURU ──
+    Route::resource('guru', AdminGuru::class);
+    Route::post('/guru/{guru}/toggle-status', [AdminGuru::class, 'toggleStatus'])->name('guru.toggle-status');
+
+    // ── SISWA ──
+    Route::resource('siswa', AdminSiswa::class)->except(['show']);
+
+    // ── STATISTIK ──
+    Route::get('/statistik', [AdminStatistik::class, 'index'])->name('statistik');
+});
 
 // ── GURU ──────────────────────────────────────────────────────────────────────
 Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru'])->group(function () {
@@ -151,6 +175,7 @@ Route::prefix('siswa')->name('siswa.')->middleware(['auth', 'role:siswa'])->grou
 
     Route::get('/dashboard', [SiswaDashboard::class, 'index'])->name('dashboard');
     Route::get('/materi',    [SiswaLatihan::class, 'materiAll'])->name('materi.all');
+    Route::get('/coding',    [SiswaLatihan::class, 'coding'])->name('coding');
 
     Route::get('/latihan',                                         [SiswaLatihan::class, 'index'])->name('latihan.index');
     Route::get('/latihan/mapel/{mapel}',                           [SiswaLatihan::class, 'mapel'])->name('latihan.mapel');

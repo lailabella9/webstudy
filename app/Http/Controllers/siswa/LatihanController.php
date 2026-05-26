@@ -24,7 +24,13 @@ class LatihanController extends Controller
 
         $mapels = MataPelajaran::withCount('materis')
             ->when($siswa->kelas_id, function ($q) use ($siswa) {
-                $q->where('kelas_id', $siswa->kelas_id);
+                $siswaKelasNama = $siswa->kelas->nama ?? '';
+                $q->whereHas('kelas', function ($subQ) use ($siswaKelasNama) {
+                    $subQ->where(function($qq) use ($siswaKelasNama) {
+                        $qq->where('nama', $siswaKelasNama)
+                           ->orWhereRaw('? LIKE CONCAT(nama, " %")', [$siswaKelasNama]);
+                    });
+                });
             }, function ($q) {
                 $q->whereNull('kelas_id');
             })
@@ -40,7 +46,13 @@ class LatihanController extends Controller
         $siswa  = Auth::user();
         $mapels = MataPelajaran::orderBy('urutan')
             ->when($siswa->kelas_id, function ($q) use ($siswa) {
-                $q->where('kelas_id', $siswa->kelas_id);
+                $siswaKelasNama = $siswa->kelas->nama ?? '';
+                $q->whereHas('kelas', function ($subQ) use ($siswaKelasNama) {
+                    $subQ->where(function($qq) use ($siswaKelasNama) {
+                        $qq->where('nama', $siswaKelasNama)
+                           ->orWhereRaw('? LIKE CONCAT(nama, " %")', [$siswaKelasNama]);
+                    });
+                });
             }, function ($q) {
                 $q->whereNull('kelas_id');
             })
@@ -52,6 +64,12 @@ class LatihanController extends Controller
             ->filter(fn($item) => $item['materis']->isNotEmpty());
 
         return view('siswa.latihan.materi_all', compact('mapels'));
+    }
+
+    // ── LATIHAN CODING ──
+    public function coding()
+    {
+        return view('siswa.latihan.coding');
     }
 
     // ── DETAIL MAPEL: daftar bab + kategori yang AKTIF — dengan lock KKM ──
@@ -318,11 +336,25 @@ class LatihanController extends Controller
     private function checkKelasAksesMapel(MataPelajaran $mapel): bool
     {
         $siswa = Auth::user();
-        if (!$siswa) {
+        if (!$siswa || !$siswa->kelas_id || !$mapel->kelas_id) {
             return false;
         }
 
-        return $siswa->kelas_id !== null && $mapel->kelas_id !== null && $siswa->kelas_id === $mapel->kelas_id;
+        if ($siswa->kelas_id === $mapel->kelas_id) {
+            return true;
+        }
+
+        $siswaKelasNama = $siswa->kelas->nama ?? '';
+        $mapelKelasNama = $mapel->kelas->nama ?? '';
+
+        if ($siswaKelasNama && $mapelKelasNama) {
+            // Cek pewarisan (prefix match) - misalnya Mapel kelas "X" atau "X RPL", Siswa "X RPL 1"
+            if (strpos($siswaKelasNama, $mapelKelasNama . ' ') === 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // ── HELPER: cek apakah bab terkunci ──

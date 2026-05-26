@@ -9,6 +9,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="shortcut icon" href="{{ asset('logo.png') }}">
     <style>
         :root {
@@ -399,6 +400,10 @@
             <a href="{{ route('siswa.materi.all') }}"
                 class="sb-item {{ request()->routeIs('siswa.materi.all') ? 'active' : '' }}">
                 <i class="bi bi-journal-richtext"></i> Semua Materi
+            </a>
+            <a href="{{ route('siswa.coding') }}"
+                class="sb-item {{ request()->routeIs('siswa.coding') ? 'active' : '' }}">
+                <i class="bi bi-code-slash"></i> Latihan Coding
             </a>
             <a href="{{ route('siswa.latihan.index') }}"
                 class="sb-item {{ request()->routeIs('siswa.latihan.index') ? 'active' : '' }}">

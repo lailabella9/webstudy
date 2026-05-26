@@ -7,6 +7,7 @@
     <title>@yield('title', 'CBT App') | {{ config('app.name') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>[x-cloak]{display:none!important}</style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -61,7 +62,9 @@
         <div class="flex justify-between h-16 items-center">
             <div class="flex items-center gap-1">
                 <span class="text-lg font-bold text-blue-600 mr-4">📚 CBT</span>
-                @if(auth()->user()->isGuru())
+                @if(auth()->user()->isAdmin())
+                    <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50' }}">Dashboard Admin</a>
+                @elseif(auth()->user()->isGuru())
                     <a href="{{ route('guru.dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('guru.dashboard') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50' }}">Dashboard</a>
                     <a href="{{ route('guru.materi.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('guru.materi.*','guru.soal.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50' }}">Materi</a>
                     <a href="{{ route('guru.siswa.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('guru.siswa.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50' }}">Data Siswa</a>
@@ -76,7 +79,7 @@
                         </div>
                     </div>
                 @else
-                    <a href="{{ route('siswa.dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('siswa.dashboard') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50' }}">Dashboard</a>
+                    <a href="{{ route('siswa.dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->requestIs('siswa.dashboard') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50' }}">Dashboard</a>
                     <a href="{{ route('siswa.latihan.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('siswa.latihan.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50' }}">Latihan</a>
                     <a href="{{ route('siswa.riwayat') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('siswa.riwayat') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50' }}">Riwayat Nilai</a>
                 @endif
@@ -95,7 +98,7 @@
                         <span class="text-sm text-gray-700 hidden sm:inline">{{ auth()->user()->nama }}</span>
                     </button>
                     <div x-show="open" x-cloak class="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50">
-                        <a href="{{ auth()->user()->isGuru() ? route('guru.profil.edit') : route('siswa.profil.edit') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">👤 Edit Profil</a>
+                        <a href="{{ auth()->user()->isAdmin() ? '#' : (auth()->user()->isGuru() ? route('guru.profil.edit') : route('siswa.profil.edit')) }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">👤 Edit Profil</a>
                         <div class="border-t border-gray-100 mt-1 pt-1">
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf

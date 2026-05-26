@@ -16,10 +16,18 @@ class DashboardController extends Controller
         $userId = $siswa->Id_user;
         $kkm    = \App\Http\Controllers\Siswa\LatihanController::KKM;
 
-        // ── Mapel milik kelas siswa ──────────────────────────────────────
+        // ── Mapel milik kelas siswa (dengan pewarisan kelas) ─────────────
         $mapelBase = MataPelajaran::when(
             $siswa->kelas_id,
-            fn($q) => $q->where('kelas_id', $siswa->kelas_id)
+            function ($q) use ($siswa) {
+                $siswaKelasNama = $siswa->kelas->nama ?? '';
+                $q->whereHas('kelas', function ($subQ) use ($siswaKelasNama) {
+                    $subQ->where(function($qq) use ($siswaKelasNama) {
+                        $qq->where('nama', $siswaKelasNama)
+                           ->orWhereRaw('? LIKE CONCAT(nama, " %")', [$siswaKelasNama]);
+                    });
+                });
+            }
         );
 
         $mapelIds = (clone $mapelBase)->pluck('Id_mapel');

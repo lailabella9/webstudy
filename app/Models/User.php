@@ -16,13 +16,17 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_active',
         'kelas_id',
         'foto_profil',
     ];
 
     protected $hidden = ['password', 'remember_token'];
 
-    protected $casts = ['password' => 'hashed'];
+    protected $casts = [
+        'password' => 'hashed',
+        'is_active' => 'boolean'
+    ];
 
     public function kelas()
     {
@@ -55,5 +59,10 @@ class User extends Authenticatable
     public function isSiswa(): bool
     {
         return $this->role === 'siswa';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
     }
 }

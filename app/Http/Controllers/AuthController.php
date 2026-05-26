@@ -31,10 +31,18 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
             /** @var User $user */
             $user = Auth::user();
+
+            // Pengecekan guru aktif/nonaktif
+            if ($user->isGuru() && !$user->is_active) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->withErrors(['email' => 'Akun Anda telah dinonaktifkan oleh Administrator.'])->onlyInput('email');
+            }
+
+            $request->session()->regenerate();
 
             return $this->redirectByRole($user);
         }
@@ -58,15 +66,14 @@ class AuthController extends Controller
             'nama'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
-            'role'     => 'required|in:guru,siswa',
-            'kelas_id'  => 'required|exists:kelas,Id_kelas',
+            'kelas_id' => 'required|exists:kelas,Id_kelas',
         ]);
 
         $user = User::create([
             'nama'     => $request->nama,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role'     => $request->role,
+            'role'     => 'siswa',
             'kelas_id' => $request->kelas_id,
         ]);
 
@@ -88,6 +95,10 @@ class AuthController extends Controller
      */
     private function redirectByRole(User $user)
     {
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         return $user->isGuru()
             ? redirect()->route('guru.dashboard')
             : redirect()->route('siswa.dashboard');

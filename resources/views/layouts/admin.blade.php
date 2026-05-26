@@ -393,51 +393,25 @@
 
         <nav class="sb-nav">
             <div class="sb-section-label">Menu Utama</div>
-            <a href="{{ route('guru.dashboard') }}"
-                class="sb-item {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}">
+            <a href="{{ route('admin.dashboard') }}"
+                class="sb-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <i class="bi bi-grid-fill"></i> Dashboard
             </a>
-            <a href="{{ route('guru.kelas.index') }}"
-                class="sb-item {{ request()->routeIs('guru.kelas.*') ? 'active' : '' }}">
-                <i class="bi bi-journal-richtext"></i> Kelola Kelas
+            <a href="{{ route('admin.guru.index') }}"
+                class="sb-item {{ request()->routeIs('admin.guru.*') ? 'active' : '' }}">
+                <i class="bi bi-person-badge-fill"></i> Kelola Guru
             </a>
-            <a href="{{ route('guru.mapel.index') }}"
-                class="sb-item {{ request()->routeIs('guru.mapel.*') ? 'active' : '' }}">
-                <i class="bi bi-journal-richtext"></i> Kelola Mata Pelajaran
+            <a href="{{ route('admin.siswa.index') }}"
+                class="sb-item {{ request()->routeIs('admin.siswa.*') ? 'active' : '' }}">
+                <i class="bi bi-people-fill"></i> Kelola Siswa
             </a>
-
-            <a href="{{ route('guru.materi.all') }}"
-                class="sb-item {{ request()->routeIs('guru.materi.all') ? 'active' : '' }}">
-                <i class="bi bi-journal-richtext"></i> Kelola Materi
-            </a>
-
-            <a href="{{ route('guru.soal.all') }}"
-                class="sb-item {{ request()->routeIs('guru.soal.all') ? 'active' : '' }}">
-                <i class="bi bi-journal-richtext"></i> Kelola Soal
-            </a>
-
-            <a href="{{ route('guru.siswa.index') }}"
-                class="sb-item {{ request()->routeIs('guru.siswa.*') ? 'active' : '' }}">
-                <i class="bi bi-people-fill"></i> Data Siswa
+            <a href="{{ route('admin.statistik') }}"
+                class="sb-item {{ request()->routeIs('admin.statistik') ? 'active' : '' }}">
+                <i class="bi bi-bar-chart-fill"></i> Statistik
             </a>
             <hr class="sb-divider">
-            <div class="sb-section-label">Laporan</div>
-            <a href="{{ route('guru.laporan') }}"
-                class="sb-item {{ request()->routeIs('guru.laporan') ? 'active' : '' }}">
-                <i class="bi bi-bar-chart-fill"></i> Statistik & Laporan
-            </a>
-            <a href="{{ route('guru.progres') }}"
-                class="sb-item {{ request()->routeIs('guru.progres') ? 'active' : '' }}">
-                <i class="bi bi-graph-up-arrow"></i> Progres Siswa
-            </a>
-            <a href="{{ route('guru.evaluasi') }}"
-                class="sb-item {{ request()->routeIs('guru.evaluasi') ? 'active' : '' }}">
-                <i class="bi bi-search"></i> Jawaban Siswa
-            </a>
-            <hr class="sb-divider">
-            <a href="{{ route('guru.profil.edit') }}"
-                class="sb-item {{ request()->routeIs('guru.profil.*') ? 'active' : '' }}">
-                <i class="bi bi-person-circle"></i> Profil Guru
+            <a href="#" class="sb-item" onclick="alert('Profil Admin belum tersedia')">
+                <i class="bi bi-person-circle"></i> Profil Admin
             </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -458,7 +432,7 @@
                 </div>
                 <div>
                     <div class="sb-uname">{{ auth()->user()->nama }}</div>
-                    <div class="sb-urole">Guru / Admin</div>
+                    <div class="sb-urole">Administrator</div>
                 </div>
             </div>
         </div>

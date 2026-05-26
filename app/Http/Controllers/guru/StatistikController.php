@@ -119,50 +119,110 @@ class StatistikController extends Controller
     public function laporan(Request $request)
     {
         /** @var \App\Models\User $guru */
-        $guru     = Auth::user();
-        $materis  = Materi::where('Id_user', $guru->Id_user)
-            ->with(['mataPelajaran'])
-            ->withCount('soals')
-            ->orderBy('mapel_id')
-            ->orderBy('urutan')
-            ->get();
-        $selected = $request->materi_id ? Materi::find($request->materi_id) : $materis->first();
+        $guru = Auth::user();
+        
+        $kelasList = \App\Models\Kelas::orderBy('nama')->get();
+        $activeKelasId = $request->kelas_id ?? ($kelasList->first()->Id_kelas ?? null);
+        $activeKelas = $kelasList->where('Id_kelas', $activeKelasId)->first();
 
-        $stats = null;
-        if ($selected) {
-            $soalIds   = $selected->soals()->pluck('Id_soal');
-            $totalPoin = $selected->soals()->sum('poin');
+        $hierarchy = [];
 
-            if ($soalIds->isEmpty() || $totalPoin == 0) {
-                $stats = ['sesi' => collect(), 'rata' => 0, 'tertinggi' => 0, 'terendah' => 0, 'lulus' => 0, 'total' => 0];
-            } else {
-                // Hitung persentase per siswa dari hasil_latihan
-                $nilaiPerSiswa = HasilLatihan::whereIn('Id_soal', $soalIds)
-                    ->selectRaw('Id_user, SUM(nilai) as total_nilai, COUNT(DISTINCT Id_soal) as dijawab, MAX(created_at) as selesai_at')
-                    ->groupBy('Id_user')
-                    ->with('user')
-                    ->get()
-                    ->map(function ($row) use ($totalPoin) {
-                        $row->persentase = round($row->total_nilai / $totalPoin * 100);
-                        $row->poin_diraih = $row->total_nilai;
-                        $row->total_poin  = $totalPoin;
-                        return $row;
+        if ($activeKelas) {
+            $siswas = User::where('role', 'siswa')->where('kelas_id', $activeKelasId)->get();
+            $mapels = \App\Models\MataPelajaran::where('Id_user', $guru->Id_user)
+                ->where('kelas_id', $activeKelasId)
+                ->with(['materis.soals'])
+                ->get();
+
+            foreach ($mapels as $mapel) {
+                $babs = $mapel->materis;
+                if ($babs->isEmpty()) continue;
+
+                $mapelLeaderboardMap = [];
+                $babAnalytics = [];
+
+                foreach ($siswas as $s) {
+                    $mapelLeaderboardMap[$s->Id_user] = [
+                        'siswa' => $s,
+                        'total_persentase' => 0,
+                        'bab_dikerjakan' => 0,
+                    ];
+                }
+
+                foreach ($babs as $bab) {
+                    $soalIds = $bab->soals->pluck('Id_soal');
+                    $totalPoin = $bab->soals->sum('poin');
+
+                    $stats = [
+                        'materi' => $bab,
+                        'total_peserta' => 0,
+                        'rata' => 0,
+                        'tertinggi' => 0,
+                        'terendah' => 0,
+                        'remedials' => []
+                    ];
+
+                    if ($soalIds->isNotEmpty() && $totalPoin > 0) {
+                        $hasilLatihan = HasilLatihan::whereIn('Id_soal', $soalIds)
+                            ->whereIn('Id_user', $siswas->pluck('Id_user'))
+                            ->selectRaw('Id_user, SUM(nilai) as total_nilai, MAX(created_at) as selesai_at')
+                            ->groupBy('Id_user')
+                            ->get();
+
+                        if ($hasilLatihan->isNotEmpty()) {
+                            $stats['total_peserta'] = $hasilLatihan->count();
+                            $persentaseList = [];
+
+                            foreach ($hasilLatihan as $hasil) {
+                                $persentase = round($hasil->total_nilai / $totalPoin * 100);
+                                $persentaseList[] = $persentase;
+
+                                // Tambahkan ke mapel leaderboard
+                                if (isset($mapelLeaderboardMap[$hasil->Id_user])) {
+                                    $mapelLeaderboardMap[$hasil->Id_user]['total_persentase'] += $persentase;
+                                    $mapelLeaderboardMap[$hasil->Id_user]['bab_dikerjakan'] += 1;
+                                }
+
+                                if ($persentase < 60) {
+                                    $stats['remedials'][] = [
+                                        'siswa' => $siswas->where('Id_user', $hasil->Id_user)->first(),
+                                        'nilai' => $persentase
+                                    ];
+                                }
+                            }
+
+                            $stats['rata'] = round(collect($persentaseList)->average());
+                            $stats['tertinggi'] = collect($persentaseList)->max();
+                            $stats['terendah'] = collect($persentaseList)->min();
+                            
+                            // Urutkan remedial dari nilai terkecil
+                            usort($stats['remedials'], function ($a, $b) {
+                                return $a['nilai'] <=> $b['nilai'];
+                            });
+                        }
+                    }
+                    $babAnalytics[] = $stats;
+                }
+
+                // Kalkulasi leaderboard mapel
+                $leaderboard = collect($mapelLeaderboardMap)
+                    ->filter(fn($data) => $data['bab_dikerjakan'] > 0)
+                    ->map(function ($data) {
+                        $data['rata_rata_mapel'] = round($data['total_persentase'] / $data['bab_dikerjakan']);
+                        return $data;
                     })
-                    ->sortByDesc('persentase')
+                    ->sortByDesc('rata_rata_mapel')
                     ->values();
 
-                $stats = [
-                    'sesi'      => $nilaiPerSiswa,
-                    'rata'      => $nilaiPerSiswa->avg('persentase') ?? 0,
-                    'tertinggi' => $nilaiPerSiswa->max('persentase') ?? 0,
-                    'terendah'  => $nilaiPerSiswa->min('persentase') ?? 0,
-                    'lulus'     => $nilaiPerSiswa->where('persentase', '>=', 60)->count(),
-                    'total'     => $nilaiPerSiswa->count(),
+                $hierarchy[] = [
+                    'mapel' => $mapel,
+                    'leaderboard' => $leaderboard,
+                    'babAnalytics' => $babAnalytics,
                 ];
             }
         }
 
-        return view('guru.statistik.laporan', compact('materis', 'selected', 'stats'));
+        return view('guru.statistik.laporan', compact('kelasList', 'activeKelasId', 'activeKelas', 'hierarchy'));
     }
 
     // ── EVALUASI: analisis per soal ──

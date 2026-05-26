@@ -88,43 +88,6 @@
             margin-bottom: 24px;
         }
 
-        /* Role tabs */
-        .role-tabs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-
-        .role-tab {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 12px 16px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 700;
-            font-size: 14px;
-            color: #64748b;
-            cursor: pointer;
-            transition: all .2s;
-            background: #f8fafc;
-            user-select: none;
-        }
-
-        .role-tab.active {
-            border-color: var(--brand);
-            background: #eff6ff;
-            color: var(--brand);
-        }
-
-        .role-tab:hover:not(.active) {
-            border-color: #93c5fd;
-            background: #f0f9ff;
-        }
-
         /* Form grid */
         .form-grid-2 {
             display: grid;
@@ -333,19 +296,6 @@
         <form method="POST" action="{{ route('register.submit') }}">
             @csrf
 
-            {{-- Role Selector --}}
-            <div class="role-tabs" id="role-tabs">
-                <div class="role-tab {{ old('role', 'siswa') === 'siswa' ? 'active' : '' }}" id="tab-siswa"
-                    onclick="setRole('siswa')">
-                    <i class="bi bi-mortarboard"></i> Siswa
-                </div>
-                <div class="role-tab {{ old('role') === 'guru' ? 'active' : '' }}" id="tab-guru"
-                    onclick="setRole('guru')">
-                    <i class="bi bi-person-badge"></i> Guru / Admin
-                </div>
-            </div>
-            <input type="hidden" name="role" id="role-input" value="{{ old('role', 'siswa') }}">
-
             {{-- Nama + Email --}}
             <div class="form-grid-2 mb14">
                 <div>
@@ -361,13 +311,12 @@
                 </div>
             </div>
 
-            <div class="mb14" id="kelas-wrapper"
-                style="{{ old('role', 'siswa') === 'siswa' ? '' : 'display:none;' }}">
+            <div class="mb14" id="kelas-wrapper">
                 <label class="lbl">
                     Kelas <span style="color:#ef4444;">*</span>
                 </label>
                 <select name="kelas_id" id="kelas_select" class="finput {{ $errors->has('kelas_id') ? 'err' : '' }}"
-                    style="background:#f8fafc;" {{ old('role', 'siswa') === 'siswa' ? 'required' : '' }}>
+                    style="background:#f8fafc;" required>
                     <option value="">-- Pilih Kelas --</option>
                     @foreach ($kelasList as $k)
                         <option value="{{ $k->Id_kelas }}"
@@ -421,22 +370,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function setRole(r) {
-            document.getElementById('role-input').value = r;
-            ['siswa', 'guru'].forEach(x => {
-                document.getElementById('tab-' + x).classList.toggle('active', x === r);
-            });
-            const kelasWrapper = document.getElementById('kelas-wrapper');
-            const kelasSelect = document.getElementById('kelas_select');
-            if (r === 'siswa') {
-                kelasWrapper.style.display = 'block';
-                kelasSelect.required = true;
-            } else {
-                kelasWrapper.style.display = 'none';
-                kelasSelect.required = false;
-            }
-        }
-
         function togglePw(id, icId) {
             const f = document.getElementById(id);
             const i = document.getElementById(icId);
