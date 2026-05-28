@@ -10,6 +10,26 @@
         <form id="filterForm" method="GET" style="display:flex;flex-direction:column;gap:16px;">
             <input type="hidden" name="kategori_id" id="filterKategoriId" value="{{ $kategoriId }}">
 
+            {{-- Row 0: Select Kelas --}}
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:nowrap;">
+                <div style="display:flex;align-items:center;gap:8px;min-width:110px;color:#475569;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.05em;">
+                    <i class="bi bi-building" style="font-size:16px;color:#f59e0b;"></i>
+                    <span>Kelas</span>
+                </div>
+                <select name="kelas_id" onchange="document.querySelector('select[name=\'materi_id\']').value=''; this.form.submit()"
+                    style="min-width:280px;height:40px;border:1.5px solid #e2e8f0;border-radius:10px;padding:0 14px;font-size:13px;background:#fff;outline:none;color:#0f172a;cursor:pointer;">
+                    <option value="">— Semua Kelas —</option>
+                    @foreach ($kelasList as $k)
+                        <option value="{{ $k->Id_kelas }}" {{ $kelas_id == $k->Id_kelas ? 'selected' : '' }}>
+                            {{ $k->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Divider --}}
+            <div style="height:1px;background:#f1f5f9;width:100%;"></div>
+
             {{-- Row 1: Select Materi --}}
             <div style="display:flex;align-items:center;gap:16px;flex-wrap:nowrap;">
                 <div style="display:flex;align-items:center;gap:8px;min-width:110px;color:#475569;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.05em;">
@@ -19,9 +39,9 @@
                 <select name="materi_id" onchange="this.form.submit()"
                     style="min-width:280px;height:40px;border:1.5px solid #e2e8f0;border-radius:10px;padding:0 14px;font-size:13px;background:#fff;outline:none;color:#0f172a;cursor:pointer;">
                     <option value="">— Pilih Materi —</option>
-                    @foreach ($materis->groupBy(fn($m) => ($m->mataPelajaran->nama ?? 'Umum') . ($m->mataPelajaran->kelas ? ' (' . $m->mataPelajaran->kelas->nama . ')' : '')) as $mapelNama => $babList)
+                    @foreach ($materis->groupBy(fn($m) => ($m->mataPelajaran->nama ?? 'Umum') . ($m->mataPelajaran && $m->mataPelajaran->kelas ? ' (' . $m->mataPelajaran->kelas->nama . ')' : '')) as $mapelNama => $materiMapel)
                         <optgroup label="{{ $mapelNama }}">
-                            @foreach ($babList as $m)
+                            @foreach ($materiMapel as $m)
                                 <option value="{{ $m->Id_materi }}" {{ optional($selected)->Id_materi == $m->Id_materi ? 'selected' : '' }}>
                                     {{ $m->judul }}
                                 </option>
@@ -187,7 +207,13 @@
                                     <tbody>
                                         @foreach ($item['jawaban'] as $j)
                                             <tr style="border-top:1px solid #f1f5f9;">
-                                                <td style="padding:9px 14px;color:#374151;">{{ $j->user->nama ?? '-' }}
+                                                <td style="padding:9px 14px;color:#374151;">
+                                                    {{ $j->user->nama ?? '-' }}
+                                                    @if(isset($j->user->kelas))
+                                                        <span style="font-size:10px;font-weight:600;background:#f1f5f9;color:#64748b;padding:2px 6px;border-radius:4px;margin-left:4px;">
+                                                            {{ $j->user->kelas->nama }}
+                                                        </span>
+                                                    @endif
                                                 </td>
                                                 <td style="padding:9px 14px;color:#64748b;">{{ $j->jawaban_siswa ?? '-' }}
                                                 </td>

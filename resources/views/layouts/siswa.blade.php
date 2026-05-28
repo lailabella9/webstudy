@@ -7,6 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — WebStudy CBT</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>[x-cloak]{display:none!important}</style>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -420,9 +422,9 @@
             </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="sb-item w-100 border-0 bg-transparent text-start" style="cursor:pointer;">
+                <a href="#" onclick="this.closest('form').submit(); return false;" class="sb-item">
                     <i class="bi bi-box-arrow-left"></i> Keluar
-                </button>
+                </a>
             </form>
         </nav>
         <div class="sb-footer">

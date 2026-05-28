@@ -33,7 +33,7 @@
         $materis = $item['materis'];
     @endphp
 
-    <div x-data="{ open: true }" style="margin-bottom:18px;">
+    <div x-data="{ open: false }" style="margin-bottom:18px;">
 
         {{-- Mapel header --}}
         <div @click="open = !open"
@@ -180,7 +180,7 @@
                             @if ($hasKonten)
                                 {{-- Tombol buka konten di tab baru --}}
                                 <button type="button"
-                                    onclick="bukaKonten({{ json_encode($materi->judul) }}, {{ json_encode($materi->konten) }})"
+                                    onclick="bukaKonten({{ json_encode($materi->judul) }}, {{ json_encode($materi->konten) }}, '{{ route('siswa.latihan.mapel', $materi->mataPelajaran) }}')"
                                     style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;
                                            background:#fff;border:1px solid #e2e8f0;border-radius:10px;
                                            font-size:12.5px;font-weight:600;color:#1a56db;cursor:pointer;
@@ -222,8 +222,29 @@
 @push('scripts')
 <script>
     // ── Buka Konten di tab baru ──────────────────────────────────────────
-    // judul & konten di-pass langsung via json_encode, aman dari quote conflict
-    function bukaKonten(judul, konten) {
+    // Fungsi untuk mengubah teks URL mentah menjadi link (tanpa merusak HTML)
+    function autoLink(html) {
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const walk = document.createTreeWalker(temp, NodeFilter.SHOW_TEXT, null, false);
+        const nodesToReplace = [];
+        let node;
+        while (node = walk.nextNode()) {
+            if (/(https?:\/\/[^\s]+)/g.test(node.nodeValue)) {
+                nodesToReplace.push(node);
+            }
+        }
+        nodesToReplace.forEach(n => {
+            const span = document.createElement('span');
+            span.innerHTML = n.nodeValue.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+            n.parentNode.replaceChild(span, n);
+        });
+        return temp.innerHTML;
+    }
+
+    // judul, konten, & url latihan di-pass langsung
+    function bukaKonten(judul, konten, latihanUrl) {
+        konten = autoLink(konten); // Ubah teks URL menjadi link
         const win = window.open('', '_blank');
         win.document.write(`<!DOCTYPE html>
 <html lang="id">
@@ -231,6 +252,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${judul}</title>
+    <base href="{{ url('/') }}/" target="_blank">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; }
@@ -290,11 +312,25 @@
             <div class="topbar-title">${judul}</div>
             <div class="topbar-sub">Isi Materi</div>
         </div>
+        <div style="margin-left: auto;">
+            <button onclick="window.close()" style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
+                Kembali ke Semua Materi
+            </button>
+        </div>
     </div>
     <div class="container">
         <div class="card">
             <div class="card-label">Isi Materi</div>
             <div class="quill-content">${konten}</div>
+            
+            <div style="margin-top: 36px; padding-top: 24px; border-top: 2px dashed #e2e8f0; text-align: center;">
+                <div style="font-size: 14px; color: #64748b; margin-bottom: 12px;">Sudah selesai membaca materi ini?</div>
+                <a href="${latihanUrl}" style="display: inline-flex; align-items: center; gap: 8px; background: #1a56db; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14.5px; box-shadow: 0 4px 12px rgba(26,86,219,0.25);">
+                    Lanjut Mengerjakan Latihan 
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+                </a>
+            </div>
         </div>
     </div>
 </body>

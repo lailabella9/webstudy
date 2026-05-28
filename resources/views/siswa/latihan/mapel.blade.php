@@ -111,14 +111,7 @@
                 </div>
             </div>
 
-            {{-- Konten bab --}}
-            @if ($materi->konten && !$locked)
-                <div style="padding:14px 20px;border-bottom:1px solid #f8fafc;background:#fafbfc;">
-                    <div style="font-size:12.5px;color:#475569;line-height:1.7;">
-                        {{ \Illuminate\Support\Str::limit(strip_tags($materi->konten), 200) }}
-                    </div>
-                </div>
-            @endif
+
 
             {{-- LOCKED: Pesan terkunci --}}
             @if ($locked)

@@ -53,14 +53,36 @@ class StatistikController extends Controller
             ->groupBy('Id_user');
 
         // 7. Bangun hirarki
-        $hierarchy = [];
-        $activeKelasList = $kelas_id 
-            ? $kelasList->where('Id_kelas', $kelas_id) 
-            : $kelasList;
+        $activeKelasList = $kelasList;
+        if ($kelas_id) {
+            $selectedKelas = $kelasList->where('Id_kelas', $kelas_id)->first();
+            if ($selectedKelas) {
+                $baseName = trim($selectedKelas->nama);
+                $descendantIds = \App\Models\Kelas::where('nama', $baseName)
+                    ->orWhere('nama', 'LIKE', $baseName . ' %')
+                    ->pluck('Id_kelas')
+                    ->toArray();
+                $activeKelasList = $kelasList->whereIn('Id_kelas', $descendantIds);
+            } else {
+                $activeKelasList = collect();
+            }
+        }
 
         foreach ($activeKelasList as $kelas) {
             $kelasSiswa = $siswas->where('kelas_id', $kelas->Id_kelas);
-            $kelasMapels = $mapels->where('kelas_id', $kelas->Id_kelas);
+            
+            // Mapel diwariskan dari parent class
+            $nama = trim($kelas->nama);
+            $parts = explode(' ', $nama);
+            $inheritedNames = [$nama];
+            if (count($parts) >= 3) {
+                $inheritedNames[] = $parts[0] . ' ' . $parts[1];
+                $inheritedNames[] = $parts[0];
+            } elseif (count($parts) == 2) {
+                $inheritedNames[] = $parts[0];
+            }
+            $inheritedIds = \App\Models\Kelas::whereIn('nama', $inheritedNames)->pluck('Id_kelas')->toArray();
+            $kelasMapels = $mapels->whereIn('kelas_id', $inheritedIds);
 
             if ($kelasSiswa->isEmpty() && $kelasMapels->isEmpty()) {
                 continue;
@@ -128,9 +150,36 @@ class StatistikController extends Controller
         $hierarchy = [];
 
         if ($activeKelas) {
-            $siswas = User::where('role', 'siswa')->where('kelas_id', $activeKelasId)->get();
+            $baseName = trim($activeKelas->nama);
+            
+            // Siswa termasuk descendant (misal: X RPL -> X RPL 1, X RPL 2)
+            $descendantIds = \App\Models\Kelas::where('nama', $baseName)
+                ->orWhere('nama', 'LIKE', $baseName . ' %')
+                ->pluck('Id_kelas')
+                ->toArray();
+                
+            $siswas = User::where('role', 'siswa')->whereIn('kelas_id', $descendantIds)->get();
+            
+            // Mapel termasuk dari parent (misal: X RPL mewarisi X)
+            $parts = explode(' ', $baseName);
+            $inheritedNames = [];
+            if (count($parts) >= 3) {
+                $inheritedNames[] = $parts[0] . ' ' . $parts[1];
+                $inheritedNames[] = $parts[0];
+            } elseif (count($parts) == 2) {
+                $inheritedNames[] = $parts[0];
+            }
+            
+            $inheritedIds = [$activeKelasId];
+            if (!empty($inheritedNames)) {
+                $parentIds = \App\Models\Kelas::whereIn('nama', $inheritedNames)->pluck('Id_kelas')->toArray();
+                $inheritedIds = array_merge($inheritedIds, $parentIds);
+            }
+            
+            $allRelevantKelasIds = array_unique(array_merge($inheritedIds, $descendantIds));
+
             $mapels = \App\Models\MataPelajaran::where('Id_user', $guru->Id_user)
-                ->where('kelas_id', $activeKelasId)
+                ->whereIn('kelas_id', $allRelevantKelasIds)
                 ->with(['materis.soals'])
                 ->get();
 
@@ -230,15 +279,43 @@ class StatistikController extends Controller
     {
         /** @var \App\Models\User $guru */
         $guru     = Auth::user();
-        $materiId = $request->materi_id;
+        $materiId   = $request->materi_id;
         $kategoriId = $request->kategori_id;
+        $kelas_id   = $request->kelas_id;
+
+        $kelasList = \App\Models\Kelas::orderBy('nama')->get();
 
         // Get all materials belonging to this teacher
-        $materis = Materi::where('Id_user', $guru->Id_user)
+        $materisQuery = Materi::where('Id_user', $guru->Id_user)
             ->with(['mataPelajaran', 'mataPelajaran.kelas'])
             ->orderBy('mapel_id')
-            ->orderBy('urutan')
-            ->get();
+            ->orderBy('urutan');
+
+        if ($kelas_id) {
+            $selectedKelas = \App\Models\Kelas::find($kelas_id);
+            if ($selectedKelas) {
+                $nama = trim($selectedKelas->nama);
+                $parts = explode(' ', $nama);
+                $inheritedNames = [];
+                if (count($parts) >= 3) {
+                    $inheritedNames[] = $parts[0] . ' ' . $parts[1];
+                    $inheritedNames[] = $parts[0];
+                } elseif (count($parts) == 2) {
+                    $inheritedNames[] = $parts[0];
+                }
+                
+                $inheritedIds = [$kelas_id];
+                if (!empty($inheritedNames)) {
+                    $parentIds = \App\Models\Kelas::whereIn('nama', $inheritedNames)->pluck('Id_kelas')->toArray();
+                    $inheritedIds = array_merge($inheritedIds, $parentIds);
+                }
+
+                $materisQuery->whereHas('mataPelajaran', function($q) use ($inheritedIds) {
+                    $q->whereIn('kelas_id', $inheritedIds);
+                });
+            }
+        }
+        $materis = $materisQuery->get();
 
         // Selected material
         $selected = $materiId
@@ -258,7 +335,21 @@ class StatistikController extends Controller
             $soals = $soalsQuery->with('pilihanJawabans')->get();
 
             foreach ($soals as $soal) {
-                $jawaban = HasilLatihan::where('Id_soal', $soal->Id_soal)->with('user')->get();
+                $jawabanQuery = HasilLatihan::where('Id_soal', $soal->Id_soal)->with('user.kelas');
+                
+                if ($kelas_id && isset($selectedKelas)) {
+                    $baseName = trim($selectedKelas->nama);
+                    $descendantIds = \App\Models\Kelas::where('nama', $baseName)
+                        ->orWhere('nama', 'LIKE', $baseName . ' %')
+                        ->pluck('Id_kelas')
+                        ->toArray();
+                    
+                    $jawabanQuery->whereHas('user', function($q) use ($descendantIds) {
+                        $q->whereIn('kelas_id', $descendantIds);
+                    });
+                }
+                
+                $jawaban = $jawabanQuery->get();
                 $benar   = $jawaban->where('is_benar', true)->count();
                 $total   = $jawaban->count();
 
@@ -273,6 +364,6 @@ class StatistikController extends Controller
             }
         }
 
-        return view('guru.statistik.evaluasi', compact('materis', 'selected', 'evaluasiData', 'kategoris', 'kategoriId'));
+        return view('guru.statistik.evaluasi', compact('materis', 'selected', 'evaluasiData', 'kategoris', 'kategoriId', 'kelasList', 'kelas_id'));
     }
 }

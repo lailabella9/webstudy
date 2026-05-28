@@ -441,9 +441,9 @@
             </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="sb-item w-100 border-0 bg-transparent text-start" style="cursor:pointer;">
+                <a href="#" onclick="this.closest('form').submit(); return false;" class="sb-item">
                     <i class="bi bi-box-arrow-left"></i> Keluar
-                </button>
+                </a>
             </form>
         </nav>
 
